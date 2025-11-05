@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Vertr.CommandLine.Common\Vertr.CommandLine.Common.csproj" />
-  </ItemGroup>
-
 </Project>
