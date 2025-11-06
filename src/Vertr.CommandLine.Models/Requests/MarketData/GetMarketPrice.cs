@@ -10,5 +10,5 @@ public class GetMarketPriceRequest : IRequest<GetMarketPriceResponse>
 
 public class GetMarketPriceResponse : ResponseBase
 {
-    public decimal Price { get; init; }
+    public decimal? Price { get; init; }
 }

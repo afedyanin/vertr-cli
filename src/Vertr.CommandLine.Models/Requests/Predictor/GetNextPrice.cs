@@ -11,7 +11,5 @@ public class GetNextPriceRequest : IRequest<GetNextPriceResponse>
 
 public class GetNextPriceResponse : ResponseBase
 {
-    public DateTime PrevTime { get; set; }
-
     public decimal? Price { get; init; }
 }

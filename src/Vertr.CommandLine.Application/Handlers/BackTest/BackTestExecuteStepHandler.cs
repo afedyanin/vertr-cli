@@ -7,7 +7,7 @@ using Vertr.CommandLine.Models.Requests.Portfolio;
 using Vertr.CommandLine.Models.Requests.Predictor;
 
 namespace Vertr.CommandLine.Application.Handlers.BackTest;
-internal class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepRequest, BackTestExecuteStepResponse>
+public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepRequest, BackTestExecuteStepResponse>
 {
     private readonly IMediator _mediator;
 
@@ -18,7 +18,7 @@ internal class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepR
 
     public async Task<BackTestExecuteStepResponse> Handle(BackTestExecuteStepRequest request, CancellationToken cancellationToken = default)
     {
-        var rb = new ResponseBuilder();
+        var rb = new BackTestExecuteStepResponseBuilder();
 
         var candlesRequest = new GetCandlesRequest
         {
@@ -86,10 +86,17 @@ internal class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepR
                 .Build();
         }
 
-        var direction = GetTradingDirection(marketPriceResponse.Price, predictionResponse.Price.Value, request.PriceThreshold);
+        if (!marketPriceResponse.Price.HasValue)
+        {
+            return rb
+                .WithMessage($"Market price is undefined.")
+                .Build();
+        }
+
+        var direction = GetTradingDirection(marketPriceResponse.Price.Value, predictionResponse.Price.Value, request.PriceThreshold);
 
         rb = rb
-            .WithMarketPrice(marketPriceResponse.Price)
+            .WithMarketPrice(marketPriceResponse.Price.Value)
             .WithSignal(direction);
 
         if (direction == 0)
@@ -117,7 +124,7 @@ internal class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepR
 
         var trades = tradingSignalResponse.Trades;
 
-        if (trades == null || trades.Length <= 0)
+        if (trades.Length <= 0)
         {
             return rb
                 .WithMessage($"No trades received.")
@@ -128,8 +135,10 @@ internal class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepR
 
         var updatePositionsRequest = new UpdatePositionsRequest
         {
+            Symbol = request.Symbol,
             PortfolioId = request.PortfolioId,
-            Trades = trades
+            TradeQty = trades.Select(t => t.Quantity).Sum(),
+            Comission = trades.Select(t => t.Comission).Sum()
         };
 
         var updatePositionsResponse = await _mediator.Send(updatePositionsRequest, cancellationToken);
@@ -141,16 +150,9 @@ internal class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepR
                 .Build();
         }
 
-        var positions = updatePositionsResponse.Positions;
-
-        if (positions == null || positions.Length <= 0)
-        {
-            return rb
-                .WithMessage($"No positions.")
-                .Build();
-        }
-
-        return rb.WithPositions(positions).Build();
+        return rb
+            .WithPositions(updatePositionsResponse.Positions)
+            .Build();
     }
 
     private static int GetTradingDirection(decimal marketPrice, decimal predictedNextPrice, decimal treshold)
@@ -168,76 +170,5 @@ internal class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepR
         }
 
         return delta > 0 ? 1 : -1;
-    }
-
-    private class ResponseBuilder
-    {
-        private Dictionary<string, object> _items = [];
-
-        private string? _message;
-
-        private Exception? _exception;
-
-        public ResponseBuilder WithMessage(string message)
-        {
-            _message = message;
-            _items[BackTestContextKeys.Message] = message;
-            return this;
-        }
-
-        public ResponseBuilder WithError(Exception? exception, string message)
-        {
-            _exception = exception;
-            _message = message;
-            _items[BackTestContextKeys.Message] = message;
-
-            return this;
-        }
-
-        public ResponseBuilder WithCandle(Candle candle)
-        {
-            _items[BackTestContextKeys.LastCandle] = candle;
-            return this;
-        }
-
-        public ResponseBuilder WithPredictedPrice(decimal price)
-        {
-            _items[BackTestContextKeys.PredictedPrice] = price;
-            return this;
-        }
-
-        public ResponseBuilder WithMarketPrice(decimal price)
-        {
-            _items[BackTestContextKeys.MarketPrice] = price;
-            return this;
-        }
-
-        public ResponseBuilder WithSignal(int signal)
-        {
-            _items[BackTestContextKeys.Signal] = signal;
-            return this;
-        }
-
-        public ResponseBuilder WithTrades(Trade[] trades)
-        {
-            _items[BackTestContextKeys.Trades] = trades;
-            return this;
-        }
-
-        public ResponseBuilder WithPositions(Position[] positions)
-        {
-            _items[BackTestContextKeys.Positions] = positions;
-            return this;
-        }
-
-        public BackTestExecuteStepResponse Build()
-        {
-            return new BackTestExecuteStepResponse
-            {
-                Items = _items,
-                Message = _message,
-                Exception = _exception
-            };
-        }
     }
 }

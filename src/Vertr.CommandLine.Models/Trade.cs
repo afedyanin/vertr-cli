@@ -1,5 +1,5 @@
 namespace Vertr.CommandLine.Models;
-public class Trade
+public record class Trade
 {
     public Guid PortfolioId { get; init; }
 
@@ -7,7 +7,9 @@ public class Trade
 
     public DateTime ExecutionTime { get; init; }
 
-    public decimal? Price { get; init; }
+    public decimal Price { get; init; }
 
-    public long Quantity { get; init; }
+    public decimal Quantity { get; init; }
+
+    public decimal Comission { get; init; }
 }

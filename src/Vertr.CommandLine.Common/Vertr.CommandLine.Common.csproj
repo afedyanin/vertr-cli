@@ -12,6 +12,7 @@
 
 	<ItemGroup>
 		<InternalsVisibleTo Include="Vertr.CommandLine.Application.Tests"/>
+		<InternalsVisibleTo Include="Vertr.CommandLine.Common.Tests"/>
 	</ItemGroup>
 
 </Project>

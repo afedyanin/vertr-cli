@@ -6,7 +6,11 @@ public class UpdatePositionsRequest : IRequest<UpdatePositionsResponse>
 {
     public Guid PortfolioId { get; init; }
 
-    public Trade[] Trades { get; init; } = [];
+    public required string Symbol { get; init; }
+
+    public decimal TradeQty { get; init; }
+
+    public decimal Comission {  get; init; }
 }
 
 public class UpdatePositionsResponse : ResponseBase

@@ -7,12 +7,24 @@ namespace Vertr.CommandLine.Application.Services
     {
         public Task<Candle[]> GetCandles(string symbol, DateTime time, int count = 1)
         {
-            return Task.FromResult<Candle[]>([]);
+            // TODO: Implement this
+            var candle = new Candle
+            {
+                TimeUtc = time,
+                Open = 101,
+                High = 110,
+                Low = 98,
+                Close = 103,
+                Volume = 505,
+            };
+
+            return Task.FromResult<Candle[]>([candle]);
         }
 
-        public Task<decimal> GetMarketPrice(string symbol, DateTime time)
+        public Task<decimal?> GetMarketPrice(string symbol, DateTime time)
         {
-            return Task.FromResult(decimal.Zero);
+            // TODO: Implement this
+            return Task.FromResult<decimal?>(106);
         }
     }
 }

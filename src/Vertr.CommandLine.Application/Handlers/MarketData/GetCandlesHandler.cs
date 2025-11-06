@@ -4,7 +4,7 @@ using Vertr.CommandLine.Models.Requests.MarketData;
 
 namespace Vertr.CommandLine.Application.Handlers.MarketData;
 
-internal class GetCandlesHandler : IRequestHandler<GetCandlesRequest, GetCandlesResponse>
+public class GetCandlesHandler : IRequestHandler<GetCandlesRequest, GetCandlesResponse>
 {
     private readonly IMarketDataService _marketDataService;
 
