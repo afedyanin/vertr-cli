@@ -1,21 +1,21 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Vertr.CommandLine.Common.Mediator;
 
-namespace Vertr.CommandLine.Application.Tests
+namespace Vertr.CommandLine.Application.Tests;
+
+public abstract class AppliactionTestBase
 {
-    public abstract class AppliactionTestBase
+    private readonly IServiceProvider _serviceProvider;
+
+    protected IMediator Mediator => _serviceProvider.GetRequiredService<IMediator>();
+
+    protected AppliactionTestBase()
     {
-        private readonly IServiceProvider _serviceProvider;
+        var services = new ServiceCollection();
 
-        protected IMediator Mediator => _serviceProvider.GetRequiredService<IMediator>();
+        services.AddMediator();
+        services.AddApplication();
 
-        protected AppliactionTestBase()
-        {
-            var services = new ServiceCollection();
-
-            services.AddMediator();
-
-            _serviceProvider = services.BuildServiceProvider();
-        }
+        _serviceProvider = services.BuildServiceProvider();
     }
 }

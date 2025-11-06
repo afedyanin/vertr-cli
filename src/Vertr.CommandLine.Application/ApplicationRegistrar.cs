@@ -1,0 +1,19 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using Vertr.CommandLine.Application.Services;
+using Vertr.CommandLine.Common.Mediator;
+using Vertr.CommandLine.Models.Abstracttions;
+
+namespace Vertr.CommandLine.Application
+{
+    public static class ApplicationRegistrar
+    {
+        public static IServiceCollection AddApplication(this IServiceCollection serviceCollection)
+        {
+            MediatorRegistrar.AddMediatorHandlers(serviceCollection, typeof(ApplicationRegistrar).Assembly);
+
+            serviceCollection.AddSingleton<IMarketDataService, MarketDataService>();
+
+            return serviceCollection;
+        }
+    }
+}
