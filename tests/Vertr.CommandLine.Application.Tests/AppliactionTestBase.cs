@@ -3,15 +3,18 @@ using Vertr.CommandLine.Common.Mediator;
 
 namespace Vertr.CommandLine.Application.Tests
 {
-    internal abstract class AppliactionTestBase
+    public abstract class AppliactionTestBase
     {
         private readonly IServiceProvider _serviceProvider;
+
+        protected IMediator Mediator => _serviceProvider.GetRequiredService<IMediator>();
 
         protected AppliactionTestBase()
         {
             var services = new ServiceCollection();
 
-            services.AddSingleton<IMediator, Mediatr>();
+            services.AddMediator();
+
             _serviceProvider = services.BuildServiceProvider();
         }
     }

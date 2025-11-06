@@ -1,13 +1,15 @@
-using Vertr.CommandLine.Models;
+using Vertr.CommandLine.Application.Handlers.BackTest;
 using Vertr.CommandLine.Models.Requests.BackTest;
 
 namespace Vertr.CommandLine.Application.Tests.Handlers;
 
-public class BackTestExecuteStepHandlerTests
+public class BackTestExecuteStepHandlerTests : AppliactionTestBase
 {
     [Test]
     public async Task CanRunBackTest()
     {
+        var handler = new BackTestExecuteStepHandler(Mediator);
+
         var request = new BackTestExecuteStepRequest
         {
             Symbol = "SBER",
@@ -16,9 +18,8 @@ public class BackTestExecuteStepHandlerTests
             Time = new DateTime(2025, 11, 1, 0, 0, 0, DateTimeKind.Utc)
         };
 
-        var handler = new BackTestExecuteStepHandler();
+        var res = await handler.Handle(request);
 
-
-        Assert.Pass();
+        Assert.That(res, Is.Not.Null);
     }
 }
