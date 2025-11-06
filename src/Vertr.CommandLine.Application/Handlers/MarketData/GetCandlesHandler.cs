@@ -29,7 +29,7 @@ internal class GetCandlesHandler : IRequestHandler<GetCandlesRequest, GetCandles
         {
             var res = new GetCandlesResponse()
             {
-                ErrorMessage = ex.Message,
+                Message = ex.Message,
             };
 
             return res;

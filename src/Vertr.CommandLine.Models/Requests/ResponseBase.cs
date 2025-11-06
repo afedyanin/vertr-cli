@@ -1,7 +1,9 @@
 namespace Vertr.CommandLine.Models.Requests;
 public abstract class ResponseBase
 {
-    public string? ErrorMessage { get; init; }
+    public string? Message { get; init; }
 
-    public bool HasErrors => !String.IsNullOrEmpty(ErrorMessage);
+    public Exception? Exception { get; init; }
+
+    public bool HasErrors => Exception != null;
 }

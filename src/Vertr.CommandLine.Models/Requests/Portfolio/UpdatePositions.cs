@@ -1,10 +1,15 @@
+using Vertr.CommandLine.Common.Mediator;
+
 namespace Vertr.CommandLine.Models.Requests.Portfolio;
 
-public class UpdatePositionsRequest
+public class UpdatePositionsRequest : IRequest<UpdatePositionsResponse>
 {
+    public Guid PortfolioId { get; init; }
+
+    public Trade[] Trades { get; init; } = [];
 }
 
-public class UpdatePositionsResponse
+public class UpdatePositionsResponse : ResponseBase
 {
-    // TODO: Return positions snapshot
+    public Position[] Positions { get; init; } = [];
 }
