@@ -8,9 +8,11 @@ public class UpdatePositionsRequest : IRequest<UpdatePositionsResponse>
 
     public required string Symbol { get; init; }
 
-    public decimal TradeQty { get; init; }
+    public Trade[] Trades { get; init; } = [];
 
     public decimal Comission {  get; init; }
+
+    public required string CurrencyCode { get; init; } = "RUB";
 }
 
 public class UpdatePositionsResponse : ResponseBase

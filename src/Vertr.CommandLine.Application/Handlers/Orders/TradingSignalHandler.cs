@@ -12,11 +12,10 @@ namespace Vertr.CommandLine.Application.Handlers.Orders
             var trade = new Trade
             {
                 ExecutionTime = DateTime.UtcNow,
-                PortfolioId = request.PortfolioId,
-                Price = request.Price ?? decimal.Zero,
+                Price = request.Price == 0 ? 105m : request.Price,
                 Quantity = request.QtyLots,
                 TradeId = Guid.NewGuid().ToString(),
-                Comission = 0.21m,
+                TradeComission = 0.21m,
             };
 
             var response = new TradingSignalResponse()

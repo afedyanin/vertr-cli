@@ -1,33 +1,40 @@
 ﻿using Vertr.CommandLine.Common.Mediator;
-using Vertr.CommandLine.Models;
+using Vertr.CommandLine.Models.Abstracttions;
 using Vertr.CommandLine.Models.Requests.Portfolio;
 
 namespace Vertr.CommandLine.Application.Handlers.Portfolio;
 
 public class UpdatePositionsHandler : IRequestHandler<UpdatePositionsRequest, UpdatePositionsResponse>
 {
+    private readonly IPortfolioService _portfolioService;
+
+    public UpdatePositionsHandler(IPortfolioService portfolioService)
+    {
+        _portfolioService = portfolioService;
+    }
+
     public Task<UpdatePositionsResponse> Handle(UpdatePositionsRequest request, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement this
-        var positionMoney = new Position
+        try
         {
-            PortfolioId = request.PortfolioId,
-            Symbol = "RUB",
-            Qty = request.Comission,
-        };
+            var positions = _portfolioService.Update(request.PortfolioId, request.Symbol, request.Trades, request.Comission, request.CurrencyCode);
 
-        var positionSymbol = new Position 
+            var response = new UpdatePositionsResponse
+            {
+                Positions = positions,
+            };
+
+            return Task.FromResult(response);
+        }
+        catch (Exception ex)
         {
-            PortfolioId = request.PortfolioId,
-            Symbol = request.Symbol,
-            Qty = request.TradeQty,
-        };
+            var errorResponse = new UpdatePositionsResponse
+            {
+                Exception = ex,
+                Message = $"Error updating positions for portfolioId={request.PortfolioId} Message={ex.Message}",
+            };
 
-        var response = new UpdatePositionsResponse
-        {
-            Positions = [positionMoney, positionSymbol]
-        };
-
-        return Task.FromResult(response);
+            return Task.FromResult(errorResponse);
+        }
     }
 }

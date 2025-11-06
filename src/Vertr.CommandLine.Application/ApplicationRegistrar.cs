@@ -12,6 +12,7 @@ namespace Vertr.CommandLine.Application
             MediatorRegistrar.AddMediatorHandlers(serviceCollection, typeof(ApplicationRegistrar).Assembly);
 
             serviceCollection.AddSingleton<IMarketDataService, MarketDataService>();
+            serviceCollection.AddSingleton<IPortfolioService, PortfolioService>();
 
             return serviceCollection;
         }

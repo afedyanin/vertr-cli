@@ -6,5 +6,5 @@ public record class Position
 
     public required string Symbol { get; init; }
 
-    public decimal Qty { get; init; }
+    public decimal Qty { get; set; }
 }

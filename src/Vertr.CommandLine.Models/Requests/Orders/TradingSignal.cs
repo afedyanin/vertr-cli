@@ -10,7 +10,7 @@ public class TradingSignalRequest : IRequest<TradingSignalResponse>
 
     public decimal QtyLots { get; init; }
 
-    public decimal? Price { get; init; }
+    public decimal Price { get; init; }
 }
 
 public class TradingSignalResponse : ResponseBase
