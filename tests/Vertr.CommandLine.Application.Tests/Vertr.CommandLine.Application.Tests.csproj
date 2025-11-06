@@ -18,7 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Vertr.CommandLine.Models\Vertr.CommandLine.Models.csproj" />
+    <ProjectReference Include="..\..\src\Vertr.CommandLine.Application\Vertr.CommandLine.Application.csproj" />
+    <ProjectReference Include="..\..\src\Vertr.CommandLine.Common\Vertr.CommandLine.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

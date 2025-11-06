@@ -2,15 +2,15 @@ using Microsoft.Extensions.Logging;
 using Vertr.CommandLine.Common.Mediator;
 using Vertr.CommandLine.Models.Requests.BackTest;
 
-namespace Vertr.CommandLine.Models;
+namespace Vertr.CommandLine.Models.BackTest;
 
-public class BackTest
+public class BackTestRunner
 {
     private readonly BackTestParams _backTestParams;
     private readonly IMediator _mediator;
     private readonly ILogger _logger;
 
-    public BackTest(
+    public BackTestRunner(
         BackTestParams backTestParams,
         IMediator mediator,
         ILogger logger)
@@ -41,19 +41,8 @@ public class BackTest
             {
                 _logger.LogError(response.Exception, $"Step {current:O}. Error:{response.Message}");
             }
-            else if (response.Positions.Any())
-            {
-                var positions = response.Positions;
-                result.Positions[current] = positions;
-                // result.Trades[current] = response.Trades;
-                var positionsString = string.Join(',', positions.Select(p => p.ToString()));
-                _logger.LogDebug($"Step {current:O}. Positions:{positions}");
-            }
-            else
-            {
-                _logger.LogDebug($"Step {current:O}. Message:{response.Message}");
-            }
 
+            result.Items[current] = response.Items;
             current += _backTestParams.Step;
         }
 

@@ -1,4 +1,4 @@
-﻿namespace Vertr.CommandLine.Models;
+﻿namespace Vertr.CommandLine.Models.BackTest;
 
 public class BackTestParams
 {

@@ -1,4 +1,5 @@
 using Vertr.CommandLine.Common.Mediator;
+using Vertr.CommandLine.Models;
 using Vertr.CommandLine.Models.Requests.BackTest;
 using Vertr.CommandLine.Models.Requests.MarketData;
 using Vertr.CommandLine.Models.Requests.Orders;
@@ -17,6 +18,8 @@ internal class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepR
 
     public async Task<BackTestExecuteStepResponse> Handle(BackTestExecuteStepRequest request, CancellationToken cancellationToken = default)
     {
+        var rb = new ResponseBuilder();
+
         var candlesRequest = new GetCandlesRequest
         {
             Symbol = request.Symbol,
@@ -28,15 +31,21 @@ internal class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepR
 
         if (candlesResponse.HasErrors)
         {
-            return HandleError($"Market data request failed with error: {candlesResponse.Message}", candlesResponse.Exception);
+            return rb
+                .WithError(candlesResponse.Exception, $"Market data request failed with error: {candlesResponse.Message}")
+                .Build();
         }
 
         var candles = candlesResponse.Candles;
 
         if (candles == null || candles.Length <= 0)
         {
-            return HandleEmptyResponse($"Cannot find any candles for symbol={request.Symbol} at time={request.Time:O}");
+            return rb
+                .WithMessage($"Cannot find any candles for symbol={request.Symbol} at time={request.Time:O}")
+                .Build();
         }
+
+        rb = rb.WithCandle(candles.OrderBy(c => c.TimeUtc).Last());
 
         var predictionRequest = new GetNextPriceRequest
         {
@@ -48,13 +57,19 @@ internal class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepR
 
         if (predictionResponse.HasErrors)
         {
-            return HandleError($"Prediction failed with error: {predictionResponse.Message}", predictionResponse.Exception);
+            return rb
+                .WithError(predictionResponse.Exception, $"Prediction failed with error: {predictionResponse.Message}")
+                .Build();
         }
 
         if (!predictionResponse.Price.HasValue)
         {
-            return HandleEmptyResponse("Prediction value undefined.");
+            return rb
+                .WithMessage($"Prediction value is undefined.")
+                .Build();
         }
+
+        rb = rb.WithPredictedPrice(predictionResponse.Price.Value);
 
         var marketPriceRequest = new GetMarketPriceRequest
         {
@@ -66,14 +81,22 @@ internal class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepR
 
         if (marketPriceResponse.HasErrors)
         {
-            return HandleError($"Market price request failed with error: {marketPriceResponse.Message}", marketPriceResponse.Exception);
+            return rb
+                .WithError(marketPriceResponse.Exception, $"Market price request failed with error: {marketPriceResponse.Message}")
+                .Build();
         }
 
-        var direction = GetTradingDirection(marketPriceResponse.Price, predictionResponse.Price.Value);
+        var direction = GetTradingDirection(marketPriceResponse.Price, predictionResponse.Price.Value, request.PriceThreshold);
+
+        rb = rb
+            .WithMarketPrice(marketPriceResponse.Price)
+            .WithSignal(direction);
 
         if (direction == 0)
         {
-            return HandleEmptyResponse("No trade direction selected.");
+            return rb
+                .WithMessage($"No trade direction selected.")
+                .Build();
         }
 
         var tradingSignalRequest = new TradingSignalRequest
@@ -87,15 +110,21 @@ internal class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepR
 
         if (tradingSignalResponse.HasErrors)
         {
-            return HandleError($"Trading signal request failed with error: {tradingSignalResponse.Message}", tradingSignalResponse.Exception);
+            return rb
+                .WithError(tradingSignalResponse.Exception, $"Trading signal request failed with error: {tradingSignalResponse.Message}")
+                .Build();
         }
 
         var trades = tradingSignalResponse.Trades;
 
         if (trades == null || trades.Length <= 0)
         {
-            return HandleEmptyResponse("No trades received.");
+            return rb
+                .WithMessage($"No trades received.")
+                .Build();
         }
+
+        rb = rb.WithTrades(trades);
 
         var updatePositionsRequest = new UpdatePositionsRequest
         {
@@ -107,48 +136,108 @@ internal class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepR
 
         if (updatePositionsResponse.HasErrors)
         {
-            return HandleError($"Update positions request failed with error: {updatePositionsResponse.Message}", updatePositionsResponse.Exception);
+            return rb
+                .WithError(updatePositionsResponse.Exception, $"Update positions request failed with error: {updatePositionsResponse.Message}")
+                .Build();
         }
 
-        var snapshot = updatePositionsResponse.Positions;
+        var positions = updatePositionsResponse.Positions;
 
-        if (snapshot == null || snapshot.Length <= 0)
+        if (positions == null || positions.Length <= 0)
         {
-            return HandleEmptyResponse("No positions.");
+            return rb
+                .WithMessage($"No positions.")
+                .Build();
         }
 
-        var stepResponse = new BackTestExecuteStepResponse
-        {
-            Positions = snapshot,
-        };
-
-        return stepResponse;
+        return rb.WithPositions(positions).Build();
     }
 
-    private static BackTestExecuteStepResponse HandleError(string message, Exception? ex)
-        => new BackTestExecuteStepResponse
-        {
-            Message = message,
-            Exception = ex
-        };
-
-    private static BackTestExecuteStepResponse HandleEmptyResponse(string? message = null)
-        => new BackTestExecuteStepResponse
-        {
-            Message = message,
-        };
-
-    private int GetTradingDirection(decimal marketPrice, decimal predictedNextPrice)
+    private static int GetTradingDirection(decimal marketPrice, decimal predictedNextPrice, decimal treshold)
     {
-        // TODO: Use treshold
-        if (predictedNextPrice > marketPrice)
+        if (marketPrice == decimal.Zero || predictedNextPrice == decimal.Zero)
         {
-            return 1; // Buy
-
+            return 0;
         }
-        else
+
+        var delta = (predictedNextPrice - marketPrice) / marketPrice;
+
+        if (Math.Abs(delta) <= treshold)
         {
-            return -1; // Sell
+            return 0;
+        }
+
+        return delta > 0 ? 1 : -1;
+    }
+
+    private class ResponseBuilder
+    {
+        private Dictionary<string, object> _items = [];
+
+        private string? _message;
+
+        private Exception? _exception;
+
+        public ResponseBuilder WithMessage(string message)
+        {
+            _message = message;
+            _items[BackTestContextKeys.Message] = message;
+            return this;
+        }
+
+        public ResponseBuilder WithError(Exception? exception, string message)
+        {
+            _exception = exception;
+            _message = message;
+            _items[BackTestContextKeys.Message] = message;
+
+            return this;
+        }
+
+        public ResponseBuilder WithCandle(Candle candle)
+        {
+            _items[BackTestContextKeys.LastCandle] = candle;
+            return this;
+        }
+
+        public ResponseBuilder WithPredictedPrice(decimal price)
+        {
+            _items[BackTestContextKeys.PredictedPrice] = price;
+            return this;
+        }
+
+        public ResponseBuilder WithMarketPrice(decimal price)
+        {
+            _items[BackTestContextKeys.MarketPrice] = price;
+            return this;
+        }
+
+        public ResponseBuilder WithSignal(int signal)
+        {
+            _items[BackTestContextKeys.Signal] = signal;
+            return this;
+        }
+
+        public ResponseBuilder WithTrades(Trade[] trades)
+        {
+            _items[BackTestContextKeys.Trades] = trades;
+            return this;
+        }
+
+        public ResponseBuilder WithPositions(Position[] positions)
+        {
+            _items[BackTestContextKeys.Positions] = positions;
+            return this;
+        }
+
+        public BackTestExecuteStepResponse Build()
+        {
+            return new BackTestExecuteStepResponse
+            {
+                Items = _items,
+                Message = _message,
+                Exception = _exception
+            };
         }
     }
 }

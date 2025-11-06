@@ -10,6 +10,10 @@
     <ProjectReference Include="..\Vertr.CommandLine.Models\Vertr.CommandLine.Models.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="Vertr.CommandLine.Application.Tests"/>
+	</ItemGroup>	
+	
   <ItemGroup>
     <Folder Include="Services\" />
   </ItemGroup>
