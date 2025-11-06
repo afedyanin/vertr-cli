@@ -10,8 +10,6 @@ public class UpdatePositionsRequest : IRequest<UpdatePositionsResponse>
 
     public Trade[] Trades { get; init; } = [];
 
-    public decimal Comission {  get; init; }
-
     public required string CurrencyCode { get; init; } = "RUB";
 }
 

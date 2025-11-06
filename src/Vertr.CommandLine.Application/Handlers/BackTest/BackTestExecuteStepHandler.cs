@@ -138,7 +138,6 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
             Symbol = request.Symbol,
             PortfolioId = request.PortfolioId,
             Trades = trades,
-            Comission = 0.52m,
             CurrencyCode = "RUB"
         };
 

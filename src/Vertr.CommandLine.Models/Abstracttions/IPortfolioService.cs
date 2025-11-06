@@ -7,7 +7,6 @@ public interface IPortfolioService
         Guid portfolioId, 
         string symbol, 
         Trade[] trades, 
-        decimal comission, 
         string currencyCode);
 
     public Position[] GetPositions(Guid portfolioId);

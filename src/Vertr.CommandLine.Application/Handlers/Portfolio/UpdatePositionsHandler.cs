@@ -17,7 +17,7 @@ public class UpdatePositionsHandler : IRequestHandler<UpdatePositionsRequest, Up
     {
         try
         {
-            var positions = _portfolioService.Update(request.PortfolioId, request.Symbol, request.Trades, request.Comission, request.CurrencyCode);
+            var positions = _portfolioService.Update(request.PortfolioId, request.Symbol, request.Trades, request.CurrencyCode);
 
             var response = new UpdatePositionsResponse
             {

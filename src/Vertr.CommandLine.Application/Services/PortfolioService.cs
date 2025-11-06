@@ -27,7 +27,7 @@ internal class PortfolioService : IPortfolioService
 
     private readonly Dictionary<Guid, Portfolio> _portfolios = [];
 
-    public Position[] Update(Guid portfolioId, string symbol, Trade[] trades, decimal comission, string currencyCode)
+    public Position[] Update(Guid portfolioId, string symbol, Trade[] trades, string currencyCode)
     {
         _portfolios.TryGetValue(portfolioId, out var portfolio);
 
@@ -41,11 +41,10 @@ internal class PortfolioService : IPortfolioService
             _portfolios[portfolioId] = portfolio;
         }
 
-        var currencyPosition = portfolio.GetOrCreatePosition(currencyCode);
+        var currencyPosition = portfolio.GetOrCreatePosition($"{currencyCode}.trading");
         var comissionsPosition = portfolio.GetOrCreatePosition($"{currencyCode}.comissions");
         var tradingPosition = portfolio.GetOrCreatePosition(symbol);
 
-        comissionsPosition.Qty -= comission;
 
         foreach (var trade in trades)
         {

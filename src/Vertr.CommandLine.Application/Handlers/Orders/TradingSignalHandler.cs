@@ -13,7 +13,7 @@ namespace Vertr.CommandLine.Application.Handlers.Orders
             {
                 ExecutionTime = DateTime.UtcNow,
                 Price = request.Price == 0 ? 105m : request.Price,
-                Quantity = request.QtyLots,
+                Quantity = request.QtyLots * 10,
                 TradeId = Guid.NewGuid().ToString(),
                 TradeComission = 0.21m,
             };
