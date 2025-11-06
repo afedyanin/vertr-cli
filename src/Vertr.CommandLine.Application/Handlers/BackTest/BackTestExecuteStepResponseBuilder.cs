@@ -1,5 +1,6 @@
 ﻿using Vertr.CommandLine.Models;
 using Vertr.CommandLine.Models.Requests.BackTest;
+using Vertr.CommandLine.Models.Requests.Orders;
 
 namespace Vertr.CommandLine.Application.Handlers.BackTest
 {
@@ -45,7 +46,7 @@ namespace Vertr.CommandLine.Application.Handlers.BackTest
             return this;
         }
 
-        public BackTestExecuteStepResponseBuilder WithSignal(int signal)
+        public BackTestExecuteStepResponseBuilder WithSignal(Direction signal)
         {
             _items[BackTestContextKeys.Signal] = signal;
             return this;

@@ -21,7 +21,7 @@ namespace Vertr.CommandLine.Application.Services
             return Task.FromResult<Candle[]>([candle]);
         }
 
-        public Task<decimal?> GetMarketPrice(string symbol, DateTime time)
+        public Task<decimal?> GetMarketPrice(string symbol, DateTime time, int shift = 0)
         {
             // TODO: Implement this
             return Task.FromResult<decimal?>(106);

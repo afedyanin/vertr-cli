@@ -8,12 +8,19 @@ public class TradingSignalRequest : IRequest<TradingSignalResponse>
 
     public required string Symbol { get; init; }
 
-    public decimal QtyLots { get; init; }
+    public Direction Direction { get; init; }
 
-    public decimal Price { get; init; }
+    public DateTime? MarketTime { get; init; }
 }
 
 public class TradingSignalResponse : ResponseBase
 {
     public Trade[] Trades { get; init; } = [];
+}
+
+public enum Direction
+{
+    Hold = 0,
+    Buy = 1,
+    Sell = -1,
 }

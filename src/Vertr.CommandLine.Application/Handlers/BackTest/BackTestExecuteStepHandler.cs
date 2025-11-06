@@ -1,5 +1,4 @@
 using Vertr.CommandLine.Common.Mediator;
-using Vertr.CommandLine.Models;
 using Vertr.CommandLine.Models.Requests.BackTest;
 using Vertr.CommandLine.Models.Requests.MarketData;
 using Vertr.CommandLine.Models.Requests.Orders;
@@ -110,7 +109,8 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
         {
             PortfolioId = request.PortfolioId,
             Symbol = request.Symbol,
-            QtyLots = request.QtyLots * direction,
+            Direction = direction,
+            MarketTime = request.Time
         };
 
         var tradingSignalResponse = await _mediator.Send(tradingSignalRequest, cancellationToken);
@@ -127,7 +127,7 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
         if (trades.Length <= 0)
         {
             return rb
-                .WithMessage($"No trades received.")
+                .WithMessage($"No trades received. Message={tradingSignalResponse.Message}")
                 .Build();
         }
 
@@ -155,20 +155,20 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
             .Build();
     }
 
-    private static int GetTradingDirection(decimal marketPrice, decimal predictedNextPrice, decimal treshold)
+    private static Direction GetTradingDirection(decimal marketPrice, decimal predictedNextPrice, decimal treshold)
     {
         if (marketPrice == decimal.Zero || predictedNextPrice == decimal.Zero)
         {
-            return 0;
+            return Direction.Hold;
         }
 
         var delta = (predictedNextPrice - marketPrice) / marketPrice;
 
         if (Math.Abs(delta) <= treshold)
         {
-            return 0;
+            return Direction.Hold;
         }
 
-        return delta > 0 ? 1 : -1;
+        return delta > 0 ? Direction.Buy : Direction.Sell;
     }
 }

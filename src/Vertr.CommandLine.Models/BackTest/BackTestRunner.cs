@@ -25,7 +25,7 @@ public class BackTestRunner
         var result = new BackTestResult();
         var current = _backTestParams.From;
 
-        while (current <= _backTestParams.To)
+        while (current < _backTestParams.To)
         {
             var request = new BackTestExecuteStepRequest
             {
@@ -45,6 +45,22 @@ public class BackTestRunner
             result.Items[current] = response.Items;
             current += _backTestParams.Step;
         }
+
+        var closeRequest = new BackTestClosePositionRequest
+        {
+            Time = current,
+            Symbol = _backTestParams.Symbol,
+            PortfolioId = _backTestParams.PortfolioId,
+        };
+
+        var closeResponse = await _mediator.Send(closeRequest);
+
+        if (closeResponse.HasErrors)
+        {
+            _logger.LogError(closeResponse.Exception, $"Step {current:O}. Error:{closeResponse.Message}");
+        }
+
+        result.Items[current] = closeResponse.Items;
 
         return result;
     }

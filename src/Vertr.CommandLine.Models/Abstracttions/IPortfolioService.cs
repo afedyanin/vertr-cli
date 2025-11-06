@@ -10,4 +10,6 @@ public interface IPortfolioService
         string currencyCode);
 
     public Position[] GetPositions(Guid portfolioId);
+
+    public Position? GetPosition(Guid portfolioId, string symbol);
 }

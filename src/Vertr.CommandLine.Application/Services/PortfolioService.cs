@@ -9,7 +9,6 @@ internal class PortfolioService : IPortfolioService
     {
         public Guid Id { get; init; }
 
-        // TODO: Сделать отдельную позицию для комиссий
         public Dictionary<string, Position> Positions { get; init; } = [];
 
         public Position GetOrCreatePosition(string symbol)
@@ -50,7 +49,7 @@ internal class PortfolioService : IPortfolioService
         {
             tradingPosition.Qty += trade.Quantity;
             currencyPosition.Qty -= trade.Quantity * trade.Price;
-            comissionsPosition.Qty -= trade.TradeComission;
+            comissionsPosition.Qty -= trade.Comission;
         }
 
         return GetPositions(portfolioId);
@@ -64,5 +63,17 @@ internal class PortfolioService : IPortfolioService
         }
 
         return [];
+    }
+
+    public Position? GetPosition(Guid portfolioId, string symbol)
+    {
+        if (!_portfolios.TryGetValue(portfolioId, out var portfolio))
+        {
+            return null;
+        }
+
+        portfolio.Positions.TryGetValue(symbol, out var position);
+
+        return position;
     }
 }
