@@ -5,6 +5,6 @@ public interface IOrderExecutionService
 {
     public Task<Trade[]> PostOrder(
         string symbol, 
-        decimal qtyLots,
+        decimal qty,
         DateTime? marketTime = null);
 }

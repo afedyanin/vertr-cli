@@ -114,7 +114,7 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
             Symbol = request.Symbol,
             PortfolioId = request.PortfolioId,
             Trades = trades,
-            CurrencyCode = "RUB"
+            CurrencyCode = request.CurrencyCode,
         };
 
         var updatePositionsResponse = await _mediator.Send(updatePositionsRequest, cancellationToken);

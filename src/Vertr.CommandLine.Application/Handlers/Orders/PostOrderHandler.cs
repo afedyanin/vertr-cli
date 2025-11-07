@@ -17,7 +17,7 @@ public class PostOrderHandler : IRequestHandler<PostOrderRequest, PostOrderRespo
     {
         try
         {
-            var trades = await _orderExecutionService.PostOrder(request.Symbol, request.QtyLots, request.MarketTime);
+            var trades = await _orderExecutionService.PostOrder(request.Symbol, request.Qty, request.MarketTime);
             return new PostOrderResponse
             {
                 Trades = trades,

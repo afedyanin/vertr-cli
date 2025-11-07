@@ -32,7 +32,7 @@ public class BackTestRunner
                 Time = current,
                 Symbol = _backTestParams.Symbol,
                 PortfolioId = _backTestParams.PortfolioId,
-                QtyLots = _backTestParams.QtyLots,
+                CurrencyCode = _backTestParams.CurrencyCode,
             };
 
             var response = await _mediator.Send(request);
@@ -48,9 +48,10 @@ public class BackTestRunner
 
         var closeRequest = new BackTestClosePositionRequest
         {
-            Time = current,
+            MarketTime = current,
             Symbol = _backTestParams.Symbol,
             PortfolioId = _backTestParams.PortfolioId,
+            CurrencyCode = _backTestParams.CurrencyCode
         };
 
         var closeResponse = await _mediator.Send(closeRequest);

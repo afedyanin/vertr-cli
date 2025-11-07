@@ -13,9 +13,9 @@ public class BackTestExecuteStepRequest : IRequest<BackTestExecuteStepResponse>
     
     public PredictorType Predictor { get; init; }
 
-    public decimal QtyLots { get; init; } = 10;
-
     public decimal PriceThreshold { get; init; }
+
+    public required string CurrencyCode { get; init; }
 }
 
 public class BackTestExecuteStepResponse : ResponseBase

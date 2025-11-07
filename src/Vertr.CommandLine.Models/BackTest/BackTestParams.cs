@@ -6,7 +6,7 @@ public class BackTestParams
 
     public required string Symbol { get; init; }
 
-    public decimal QtyLots { get; init; } = 10;
+    public required string CurrencyCode { get; init; }
 
     public DateTime From { get; init; }
     
