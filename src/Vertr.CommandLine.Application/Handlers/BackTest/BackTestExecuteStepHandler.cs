@@ -19,37 +19,11 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
     {
         var rb = new BackTestExecuteStepResponseBuilder();
 
-        var candlesRequest = new GetCandlesRequest
+        var predictionRequest = new PredictionRequest
         {
-            Symbol = request.Symbol,
             Time = request.Time,
-            Count = 1
-        };
-
-        var candlesResponse = await _mediator.Send(candlesRequest, cancellationToken);
-
-        if (candlesResponse.HasErrors)
-        {
-            return rb
-                .WithError(candlesResponse.Exception, $"Market data request failed with error: {candlesResponse.Message}")
-                .Build();
-        }
-
-        var candles = candlesResponse.Candles;
-
-        if (candles == null || candles.Length <= 0)
-        {
-            return rb
-                .WithMessage($"Cannot find any candles for symbol={request.Symbol} at time={request.Time:O}")
-                .Build();
-        }
-
-        rb = rb.WithCandle(candles.OrderBy(c => c.TimeUtc).Last());
-
-        var predictionRequest = new GetNextPriceRequest
-        {
             Symbol = request.Symbol,
-            Candles = candles,
+            Predictor = request.Predictor,
         };
 
         var predictionResponse = await _mediator.Send(predictionRequest, cancellationToken);
@@ -61,14 +35,16 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
                 .Build();
         }
 
-        if (!predictionResponse.Price.HasValue)
+        if (!predictionResponse.PredictedPrice.HasValue)
         {
             return rb
-                .WithMessage($"Prediction value is undefined.")
+                .WithMessage($"Prediction value is undefined. Message: {predictionResponse.Message}")
                 .Build();
         }
 
-        rb = rb.WithPredictedPrice(predictionResponse.Price.Value);
+        rb = rb
+            .WithPredictedPrice(predictionResponse.PredictedPrice.Value)
+            .WithCandle(predictionResponse.LastCandle);
 
         var marketPriceRequest = new GetMarketPriceRequest
         {

@@ -1,4 +1,5 @@
 using Vertr.CommandLine.Common.Mediator;
+using Vertr.CommandLine.Models.Requests.Predictor;
 
 namespace Vertr.CommandLine.Models.Requests.BackTest;
 
@@ -9,6 +10,8 @@ public class BackTestExecuteStepRequest : IRequest<BackTestExecuteStepResponse>
     public Guid PortfolioId { get; init; }
 
     public required string Symbol { get; init; }
+    
+    public PredictorType Predictor { get; init; }
 
     public decimal QtyLots { get; init; } = 10;
 

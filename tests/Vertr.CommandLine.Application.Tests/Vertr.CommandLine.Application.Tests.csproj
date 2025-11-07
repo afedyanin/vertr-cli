@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Vertr.CommandLine.Application\Vertr.CommandLine.Application.csproj" />
-    <ProjectReference Include="..\..\src\Vertr.CommandLine.Common\Vertr.CommandLine.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

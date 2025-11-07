@@ -28,8 +28,13 @@ namespace Vertr.CommandLine.Application.Handlers.BackTest
             return this;
         }
 
-        public BackTestExecuteStepResponseBuilder WithCandle(Candle candle)
+        public BackTestExecuteStepResponseBuilder WithCandle(Candle? candle)
         {
+            if (candle == null)
+            {
+                return this;
+            }
+
             _items[BackTestContextKeys.LastCandle] = candle;
             return this;
         }
