@@ -35,23 +35,14 @@ public class BackTestRunner
 
         await _marketDataService.LoadData(_backTestParams.Symbol, [.. candles]);
 
-        var enumerable = _marketDataService.GetEnumerable(_backTestParams.Symbol);
-        Debug.Assert(enumerable != null);
+        var timeIndex = _marketDataService.GetEnumerable(_backTestParams.Symbol);
+        Debug.Assert(timeIndex != null);
 
-        return result;
-
-        /*
-        foreach (var timeStep in enumerator!)
-        {
-
-        }
-
-
-        while (current < _backTestParams.To)
+        foreach (var timeStep in timeIndex)
         {
             var request = new BackTestExecuteStepRequest
             {
-                Time = current,
+                Time = timeStep,
                 Symbol = _backTestParams.Symbol,
                 PortfolioId = _backTestParams.PortfolioId,
                 CurrencyCode = _backTestParams.CurrencyCode,
@@ -61,16 +52,18 @@ public class BackTestRunner
 
             if (response.HasErrors)
             {
-                _logger.LogError(response.Exception, $"Step {current:O}. Error:{response.Message}");
+                _logger.LogError(response.Exception, $"Step {timeStep:O}. Error:{response.Message}");
             }
 
-            result.Items[current] = response.Items;
-            current += _backTestParams.Step;
+            result.Items[timeStep] = response.Items;
         }
+
+        (DateTime? first, DateTime? last) = _marketDataService.GetTimeRange(_backTestParams.Symbol);
+        Debug.Assert(last != null);
 
         var closeRequest = new BackTestClosePositionRequest
         {
-            MarketTime = current,
+            MarketTime = last.Value,
             Symbol = _backTestParams.Symbol,
             PortfolioId = _backTestParams.PortfolioId,
             CurrencyCode = _backTestParams.CurrencyCode
@@ -80,12 +73,12 @@ public class BackTestRunner
 
         if (closeResponse.HasErrors)
         {
-            _logger.LogError(closeResponse.Exception, $"Step {current:O}. Error:{closeResponse.Message}");
+            _logger.LogError(closeResponse.Exception, $"Step close. Error:{closeResponse.Message}");
         }
 
-        result.Items[current] = closeResponse.Items;
+        // Перезатирает, нужно отдельно хранить
+        result.Items[last.Value] = closeResponse.Items;
 
         return result;
-        */
     }
 }

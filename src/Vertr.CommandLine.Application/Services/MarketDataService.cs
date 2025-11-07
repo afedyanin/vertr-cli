@@ -49,5 +49,18 @@ namespace Vertr.CommandLine.Application.Services
             _storage[symbol] = candles.OrderBy(c => c.TimeUtc).ToArray();
             return Task.CompletedTask;
         }
+
+        public (DateTime?, DateTime?) GetTimeRange(string symbol)
+        {
+            if (_storage.TryGetValue(symbol, out var candles))
+            {
+                var from = candles.First().TimeUtc;
+                var to = candles.Last().TimeUtc;
+
+                return (from, to);
+            }
+
+            return (null, null);
+        }
     }
 }

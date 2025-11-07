@@ -9,4 +9,6 @@ public interface IMarketDataService
     public IEnumerable<DateTime>? GetEnumerable(string symbol);
 
     public Task LoadData(string symbol, Candle[] candles);
+
+    public (DateTime?, DateTime?) GetTimeRange(string symbol);
 }
