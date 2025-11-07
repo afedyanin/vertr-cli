@@ -1,8 +1,7 @@
-﻿using System.Diagnostics.Metrics;
-using System.Text;
-using Vertr.CommandLine.Models.Extensions;
+﻿using System.Text;
+using Vertr.CommandLine.Models.Helpers;
 
-namespace Vertr.CommandLine.Models.Tests.Extensions;
+namespace Vertr.CommandLine.Models.Tests.Helpers;
 
 public class CandleExtensionsTests
 {

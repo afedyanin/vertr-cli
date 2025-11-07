@@ -1,5 +1,8 @@
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using Vertr.CommandLine.Common.Mediator;
+using Vertr.CommandLine.Models.Abstracttions;
+using Vertr.CommandLine.Models.Helpers;
 using Vertr.CommandLine.Models.Requests.BackTest;
 
 namespace Vertr.CommandLine.Models.BackTest;
@@ -8,14 +11,17 @@ public class BackTestRunner
 {
     private readonly BackTestParams _backTestParams;
     private readonly IMediator _mediator;
+    private readonly IMarketDataService _marketDataService;
     private readonly ILogger _logger;
 
     public BackTestRunner(
         BackTestParams backTestParams,
+        IMarketDataService marketDataService,
         IMediator mediator,
         ILogger logger)
     {
         _backTestParams = backTestParams;
+        _marketDataService = marketDataService;
         _mediator = mediator;
         _logger = logger;
     }
@@ -23,7 +29,23 @@ public class BackTestRunner
     public async Task<BackTestResult> Run()
     {
         var result = new BackTestResult();
-        var current = _backTestParams.From;
+        
+        var candles = CsvImporter.LoadCandles(_backTestParams.DataSourceFilePath);
+        Debug.Assert(candles != null);
+
+        await _marketDataService.LoadData(_backTestParams.Symbol, [.. candles]);
+
+        var enumerable = _marketDataService.GetEnumerable(_backTestParams.Symbol);
+        Debug.Assert(enumerable != null);
+
+        return result;
+
+        /*
+        foreach (var timeStep in enumerator!)
+        {
+
+        }
+
 
         while (current < _backTestParams.To)
         {
@@ -64,5 +86,6 @@ public class BackTestRunner
         result.Items[current] = closeResponse.Items;
 
         return result;
+        */
     }
 }

@@ -8,9 +8,5 @@ public class BackTestParams
 
     public required string CurrencyCode { get; init; }
 
-    public DateTime From { get; init; }
-    
-    public DateTime To { get; init; }
-    
-    public TimeSpan Step { get; init; }
+    public required string DataSourceFilePath { get; init; }
 }

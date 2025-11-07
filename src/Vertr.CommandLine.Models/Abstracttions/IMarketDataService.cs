@@ -6,5 +6,7 @@ public interface IMarketDataService
 
     public Task<decimal?> GetMarketPrice(string symbol, DateTime time, int shift = 0);
 
-    public IEnumerator<DateTime>? GetTimeEnumerator(string symbol);
+    public IEnumerable<DateTime>? GetEnumerable(string symbol);
+
+    public Task LoadData(string symbol, Candle[] candles);
 }
