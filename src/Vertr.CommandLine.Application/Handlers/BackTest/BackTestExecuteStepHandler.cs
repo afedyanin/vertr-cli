@@ -68,7 +68,7 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
                 .Build();
         }
 
-        var direction = GetTradingDirection(marketPriceResponse.Price.Value, predictionResponse.Price.Value, request.PriceThreshold);
+        var direction = GetTradingDirection(marketPriceResponse.Price.Value, predictionResponse.PredictedPrice.Value, request.PriceThreshold);
 
         rb = rb
             .WithMarketPrice(marketPriceResponse.Price.Value)
