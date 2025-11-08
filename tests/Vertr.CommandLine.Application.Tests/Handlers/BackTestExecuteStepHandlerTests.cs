@@ -39,7 +39,7 @@ public class BackTestExecuteStepHandlerTests : AppliactionTestBase
             OpenPositionQty= _backTestParams.OpenPositionQty,
             Predictor = Models.Requests.Predictor.PredictorType.LastValue,
             PriceThreshold = 0,
-            Time = candleRange.FirstDate.AddHours(1),
+            Time = candleRange.FirstDate,
         };
 
         var res = await Mediator.Send(request);
