@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using Vertr.CommandLine.Models.BackTest;
+﻿using Vertr.CommandLine.Models.BackTest;
 using Vertr.CommandLine.Models.Helpers;
 
 namespace Vertr.CommandLine.Models.Tests.BackTest
@@ -63,28 +61,29 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
         }
 
         [Test]
-        public async Task CanRunBacktest()
+        public async Task CanRunBackTest()
         {
-            var logger = NullLoggerFactory.Instance.CreateLogger<BackTestRunnerTests>();
-            var bt = new BackTestRunner(_backTestParams, MarketDataService, Mediator, logger);
-
+            var bt = new BackTestRunner(_backTestParams, MarketDataService, Mediator, NullLogger);
             var res = await bt.Run();
 
-            /*
-            foreach(var result in res.DumpAll())
-            {
-                Console.WriteLine(result);
-            }
-            Console.WriteLine(res.DumpLastStep());
-            Console.WriteLine("-----------------");
-            Console.WriteLine(res.DumpCloseStep());
-
-             */
+            DumpResults(res);
 
             var summary = res.GetSummary(_backTestParams.CurrencyCode);
             Console.WriteLine(summary);
 
             Assert.Pass();
+        }
+
+        private static void DumpResults(BackTestResult? backTestResult)
+        {
+            /*
+            foreach (var result in backTestResult.DumpAll())
+            {
+                Console.WriteLine(result);
+            }*/
+            Console.WriteLine(backTestResult.DumpLastStep());
+            Console.WriteLine("-----------------");
+            Console.WriteLine(backTestResult.DumpCloseStep());
         }
     }
 }

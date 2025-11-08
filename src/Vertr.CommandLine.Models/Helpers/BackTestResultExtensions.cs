@@ -27,13 +27,23 @@ namespace Vertr.CommandLine.Models.Helpers
             return positions.GetSummary(currencyCode);
         }
 
-        public static string DumpLastStep(this BackTestResult backTestResult)
+        public static string DumpLastStep(this BackTestResult? backTestResult)
         {
+            if (backTestResult == null)
+            {
+                return string.Empty;
+            }
+
             return backTestResult.DumpStep(backTestResult.Items.Keys.OrderBy(k => k).Last());
         }
 
-        public static IEnumerable<string> DumpAll(this BackTestResult backTestResult)
+        public static IEnumerable<string> DumpAll(this BackTestResult? backTestResult)
         {
+            if (backTestResult == null)
+            {
+                return [];
+            }
+
             var res = new List<string>();
 
             foreach (var item in backTestResult.Items)
@@ -44,15 +54,20 @@ namespace Vertr.CommandLine.Models.Helpers
             return res;
         }
 
-        public static string DumpStep(this BackTestResult backTestResult, DateTime timeStep)
+        public static string DumpStep(this BackTestResult? backTestResult, DateTime timeStep)
         {
+            if (backTestResult == null)
+            {
+                return string.Empty;
+            }
+
             backTestResult.Items.TryGetValue(timeStep, out var items);
             return DumpItems(items);
         }
 
-        public static string DumpCloseStep(this BackTestResult backTestResult)
+        public static string DumpCloseStep(this BackTestResult? backTestResult)
         {
-            return DumpItems(backTestResult.FinalClosePositionsResult ?? []);
+            return DumpItems(backTestResult?.FinalClosePositionsResult ?? []);
         }
 
         internal static string DumpItems(IDictionary<string, object>? items)
@@ -109,7 +124,5 @@ namespace Vertr.CommandLine.Models.Helpers
 
             return sb.ToString();
         }
-
-
     }
 }

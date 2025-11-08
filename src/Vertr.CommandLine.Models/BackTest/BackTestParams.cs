@@ -17,4 +17,6 @@ public class BackTestParams
     public decimal OpenPositionQty { get; init; } = 100;
 
     public decimal ComissionPercent { get; init; } = 0.003m;
+
+    public DateOnly? Intraday {  get; init; }
 }
