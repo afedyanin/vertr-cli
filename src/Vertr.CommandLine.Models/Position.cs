@@ -7,4 +7,12 @@ public record class Position
     public required string Symbol { get; init; }
 
     public decimal Qty { get; set; }
+
+    public Position ClonePosition()
+        => new()
+        {
+            PortfolioId = PortfolioId,
+            Symbol = Symbol, 
+            Qty = Qty, 
+        };
 }

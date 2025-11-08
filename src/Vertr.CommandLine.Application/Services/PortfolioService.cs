@@ -59,7 +59,7 @@ internal class PortfolioService : IPortfolioService
     {
         if (_portfolios.TryGetValue(portfolioId, out var portfolio))
         {
-            return [.. portfolio.Positions.Values];
+            return [.. portfolio.Positions.Values.Select(p=> p.ClonePosition())];
         }
 
         return [];
@@ -74,6 +74,6 @@ internal class PortfolioService : IPortfolioService
 
         portfolio.Positions.TryGetValue(symbol, out var position);
 
-        return position;
+        return position?.ClonePosition();
     }
 }

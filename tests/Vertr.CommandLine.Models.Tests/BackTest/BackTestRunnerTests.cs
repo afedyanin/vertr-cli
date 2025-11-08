@@ -14,9 +14,9 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
                 Symbol = "SBER",
                 CurrencyCode = "RUB",
                 DataSourceFilePath = "Data\\SBER_251101_251104.csv",
-                MaxSteps = 3,
+                MaxSteps = 30,
                 OpenPositionQty = 100,
-                ComissionPercent = 0.003m,
+                ComissionPercent = 0.0m,
             };
 
         [Test]
@@ -61,11 +61,15 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
 
             var res = await bt.Run();
 
+            /*
             foreach(var result in res.DumpAll())
             {
                 Console.WriteLine(result);
             }
-            Console.WriteLine("\n-----------------");
+            */
+
+            Console.WriteLine(res.DumpLastStep());
+            Console.WriteLine("-----------------");
             Console.WriteLine(res.DumpCloseStep());
 
             Assert.Pass();

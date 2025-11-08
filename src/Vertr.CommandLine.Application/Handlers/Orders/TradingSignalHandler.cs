@@ -69,7 +69,7 @@ namespace Vertr.CommandLine.Application.Handlers.Orders
             }
 
             // Reverse
-            var reverseQty = position.Qty * (request.Direction == Direction.Buy ? 2 : -2);
+            var reverseQty = position.Qty * (-2);
 
             var reverseTrades = await _orderExecutionService.PostOrder(
                 request.Symbol,
