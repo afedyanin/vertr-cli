@@ -1,4 +1,5 @@
 ﻿using Vertr.CommandLine.Common.Mediator;
+using Vertr.CommandLine.Models;
 using Vertr.CommandLine.Models.Abstracttions;
 using Vertr.CommandLine.Models.Requests.Orders;
 
@@ -31,7 +32,8 @@ namespace Vertr.CommandLine.Application.Handlers.Orders
             }
 
             var position = _portfolioService.GetPosition(request.PortfolioId, request.Symbol);
-            var nextMarketPrice = await _marketDataService.GetMarketPrice(request.Symbol, request.MarketTime, shift: 1);
+
+            var nextMarketPrice = await _marketDataService.GetMarketPrice(request.Symbol, request.MarketTime, PriceType.Open ,shift: 1);
 
             if (nextMarketPrice == null)
             {

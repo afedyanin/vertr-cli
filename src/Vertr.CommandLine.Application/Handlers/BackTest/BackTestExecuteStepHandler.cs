@@ -53,7 +53,7 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
             .WithPredictedPrice(predictionResponse.PredictedPrice.Value)
             .WithCandle(predictionResponse.LastCandle);
 
-        var marketPrice = await _marketDataService.GetMarketPrice(request.Symbol, request.Time);
+        var marketPrice = await _marketDataService.GetMarketPrice(request.Symbol, request.Time, Models.PriceType.Avg);
 
         if (!marketPrice.HasValue)
         {

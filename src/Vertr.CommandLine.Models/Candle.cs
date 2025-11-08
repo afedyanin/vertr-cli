@@ -10,3 +10,10 @@ public record class Candle
     public long Volume { get; init; }
 }
 
+public enum PriceType
+{
+    Open,
+    Close, 
+    Mid, // => Open + Close / 2
+    Avg
+}

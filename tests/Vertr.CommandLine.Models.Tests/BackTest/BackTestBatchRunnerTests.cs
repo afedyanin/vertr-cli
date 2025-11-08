@@ -30,7 +30,7 @@ public class BackTestBatchRunnerTests : SystemTestBase
     [Test]
     public async Task CanRunBackTestBatch()
     {
-        var bt = new BackTestRunner(MarketDataService, PortfolioService, Mediator, NullLogger);
+        var bt = new BackTestRunner(MarketDataService, PortfolioService, Mediator, Logger);
         await bt.InitMarketData(_dataSources);
         var res = await bt.RunBatch(_backTestParams, 10);
         var summaries = res.Select(r => r.GetSummary(_backTestParams.CurrencyCode));
@@ -46,7 +46,7 @@ public class BackTestBatchRunnerTests : SystemTestBase
     [Test]
     public async Task CanRunBackTestBatchByDay()
     {
-        var bt = new BackTestRunner(MarketDataService, PortfolioService, Mediator, NullLogger);
+        var bt = new BackTestRunner(MarketDataService, PortfolioService, Mediator, Logger);
         await bt.InitMarketData(_dataSources);
 
         var res = await bt.RunBatchByDay(_backTestParams, 20);

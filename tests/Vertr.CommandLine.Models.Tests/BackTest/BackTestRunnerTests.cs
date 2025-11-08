@@ -71,31 +71,28 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
         [Test]
         public async Task CanRunBackTest()
         {
-            var bt = new BackTestRunner(MarketDataService, PortfolioService, Mediator, NullLogger);
+            var bt = new BackTestRunner(MarketDataService, PortfolioService, Mediator, Logger);
             await bt.InitMarketData(_dataSources);
             var res = await bt.Run(_backTestParams);
 
             DumpResults(res);
-
-            var summary = res.GetSummary(_backTestParams.CurrencyCode);
-            Console.WriteLine(summary);
-
-            Assert.Pass();
         }
 
-        private static void DumpResults(BackTestResult? backTestResult)
+        private static void DumpResults(BackTestResult backTestResult)
         {
             foreach (var result in backTestResult.DumpAll())
             {
-                // Console.WriteLine(result);
+                //Console.WriteLine(result);
             }
 
-
-            Console.WriteLine("LAST STEP:");
+            Console.WriteLine("\nLAST STEP:");
             Console.WriteLine(backTestResult.DumpLastStep());
             
             Console.WriteLine("\nCLOSE STEP:");
             Console.WriteLine(backTestResult.DumpCloseStep());
+
+            Console.WriteLine("\nSUMMARY:");
+            Console.WriteLine(backTestResult.GetSummary(_backTestParams.CurrencyCode));
         }
     }
 }

@@ -27,22 +27,19 @@ namespace Vertr.CommandLine.Application.Services
             return Task.FromResult(res);
         }
 
-        public Task<decimal?> GetMarketPrice(string symbol, DateTime time, int shift = 0)
+        public Task<decimal?> GetMarketPrice(string symbol, DateTime time, PriceType priceType, int shift = 0)
         {
             if (_storage.TryGetValue(symbol, out var candles))
             {
-                var candle = candles.GetShifted(time, 1);
-
-                if (candle != null)
-                {
-                    return Task.FromResult<decimal?>(candle.Close);
-                }
+                var candle = candles.GetShifted(time, shift);
+                var price = candle.GetPrice(priceType);
+                return Task.FromResult(price);
             }
 
             return Task.FromResult<decimal?>(null);
         }
 
-        public Task LoadData(string symbol, Candle[] candles)
+        public Task LoadData(string symbol, IEnumerable<Candle> candles)
         {
             _storage[symbol] = candles.OrderBy(c => c.TimeUtc).ToArray();
             return Task.CompletedTask;

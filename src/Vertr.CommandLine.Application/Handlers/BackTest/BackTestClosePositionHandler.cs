@@ -26,21 +26,34 @@ namespace Vertr.CommandLine.Application.Handlers.BackTest
         {
             var position = _portfolioService.GetPosition(request.PortfolioId, request.Symbol);
 
+            var items = new Dictionary<string, object>();
+            items[BackTestContextKeys.MarketTime] = request.MarketTime;
+
             if (position == null || position.Qty == 0)
             {
+                var message = $"Position with PortfolioId={request.PortfolioId} with Symbol={request.Symbol} is already closed.";
+                
+                items[BackTestContextKeys.Message] = message;
+
                 return new BackTestClosePostionResponse
                 {
-                    Message = $"Position with PortfolioId={request.PortfolioId} with Symbol={request.Symbol} is already closed.",
+                    Message = message,
+                    Items = items
                 };
             }
 
-            var marketPrice = await _marketDataService.GetMarketPrice(request.Symbol, request.MarketTime, shift: 0);
+            var marketPrice = await _marketDataService.GetMarketPrice(request.Symbol, request.MarketTime, Models.PriceType.Avg);
 
             if (marketPrice == null)
             {
+                var message = $"Cannot get market price to post order. MarketTime={request.MarketTime} Skipping request.";
+
+                items[BackTestContextKeys.Message] = message;
+
                 return new BackTestClosePostionResponse()
                 {
-                    Message = "Cannot get market price to post order. Skipping request."
+                    Message = message,
+                    Items = items
                 };
             }
 
@@ -52,9 +65,14 @@ namespace Vertr.CommandLine.Application.Handlers.BackTest
 
             if (trades == null || trades.Length <= 0)
             {
+                var message = $"No trades received for close PortfolioId={request.PortfolioId} with Symbol={request.Symbol}.";
+
+                items[BackTestContextKeys.Message] = message;
+
                 return new BackTestClosePostionResponse
                 {
-                    Message = $"No trades received for close PortfolioId={request.PortfolioId} with Symbol={request.Symbol}.",
+                    Message = message,
+                    Items = items
                 };
             }
 
@@ -64,9 +82,6 @@ namespace Vertr.CommandLine.Application.Handlers.BackTest
                 trades,
                 request.CurrencyCode);
 
-            var items = new Dictionary<string, object>();
-
-            items[BackTestContextKeys.MarketTime] = request.MarketTime;
             items[BackTestContextKeys.Trades] = trades;
             items[BackTestContextKeys.Positions] = positions;
 

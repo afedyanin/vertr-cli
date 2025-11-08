@@ -4,6 +4,23 @@ namespace Vertr.CommandLine.Models.Helpers;
 
 public static class CandleExtensions
 {
+    public static decimal? GetPrice(this Candle? candle, PriceType priceType)
+    {
+        if (candle == null)
+        {
+            return null;
+        }
+
+        return priceType switch
+        {
+            PriceType.Open => candle.Open,
+            PriceType.Close => candle.Close,
+            PriceType.Mid => (candle.Open + candle.Close) / 2,
+            PriceType.Avg => (candle.Open + candle.Close + candle.Low + candle.High) / 4,
+            _ => null,
+        };
+    }
+
     public static IEnumerable<DateTime> GetTimeEnumerable(
         this IEnumerable<Candle>? orderedCandles)
     {
