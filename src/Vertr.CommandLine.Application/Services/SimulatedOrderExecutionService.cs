@@ -13,7 +13,7 @@ internal class SimulatedOrderExecutionService : IOrderExecutionService
         _marketDataService = marketDataService;
     }
 
-    public async Task<Trade[]> PostOrder(
+    public Task<Trade[]> PostOrder(
         string symbol, 
         decimal qty,
         decimal price,
@@ -30,6 +30,6 @@ internal class SimulatedOrderExecutionService : IOrderExecutionService
             Comission = Math.Abs(price * qty * comissionPercent),
         };
 
-        return [trade];
+        return Task.FromResult<Trade[]>([trade]);
     }
 }

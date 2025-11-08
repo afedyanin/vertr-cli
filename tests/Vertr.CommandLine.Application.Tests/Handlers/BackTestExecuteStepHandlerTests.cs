@@ -1,4 +1,5 @@
 using Vertr.CommandLine.Application.Services;
+using Vertr.CommandLine.Models;
 using Vertr.CommandLine.Models.BackTest;
 using Vertr.CommandLine.Models.Helpers;
 using Vertr.CommandLine.Models.Requests.BackTest;
@@ -7,14 +8,22 @@ namespace Vertr.CommandLine.Application.Tests.Handlers;
 
 public class BackTestExecuteStepHandlerTests : AppliactionTestBase
 {
+    private static readonly FileDataSource[] _dataSources =
+    {
+            new FileDataSource
+            {
+                Symbol = "SBER",
+                FilePath = "Data\\SBER_251101_251104.csv",
+            }
+        };
+
     private static readonly BackTestParams _backTestParams =
         new BackTestParams
         {
             PortfolioId = Guid.NewGuid(),
             Symbol = "SBER",
             CurrencyCode = "RUB",
-            DataSourceFilePath = "Data\\SBER_251101_251104.csv",
-            MaxSteps = 3,
+            Steps = 3,
             OpenPositionQty = 100,
             ComissionPercent = 0.001m,
         };
@@ -22,7 +31,7 @@ public class BackTestExecuteStepHandlerTests : AppliactionTestBase
     [Test]
     public async Task CanRunBackTestStep()
     {
-        var candles = CsvImporter.LoadCandles(_backTestParams.DataSourceFilePath);
+        var candles = CsvImporter.LoadCandles(_dataSources[0].FilePath);
         Assert.That(candles, Is.Not.Null);
         await MarketDataService.LoadData(_backTestParams.Symbol, [.. candles]);
 

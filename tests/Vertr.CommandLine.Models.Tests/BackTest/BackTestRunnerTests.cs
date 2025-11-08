@@ -5,13 +5,21 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
 {
     public class BackTestRunnerTests : SystemTestBase
     {
+        private static readonly FileDataSource[] _dataSources = 
+        {
+            new FileDataSource
+            {
+                Symbol = "SBER",
+                FilePath = "Data\\SBER_251101_251104.csv",
+            }
+        };
+
         private static readonly BackTestParams _backTestParams = 
             new BackTestParams
             {
                 PortfolioId = Guid.NewGuid(),
                 Symbol = "SBER",
                 CurrencyCode = "RUB",
-                DataSourceFilePath = "Data\\SBER_251101_251104.csv",
                 Steps = 3,
                 Skip = 10,
                 OpenPositionQty = 100,
@@ -21,7 +29,7 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
         [Test]
         public async Task CanIterateBackTestSteps()
         {
-            var candles = CsvImporter.LoadCandles(_backTestParams.DataSourceFilePath);
+            var candles = CsvImporter.LoadCandles(_dataSources[0].FilePath);
             Assert.That(candles, Is.Not.Null);
             await MarketDataService.LoadData(_backTestParams.Symbol, [.. candles]);
 
@@ -63,8 +71,9 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
         [Test]
         public async Task CanRunBackTest()
         {
-            var bt = new BackTestRunner(_backTestParams, MarketDataService, Mediator, NullLogger);
-            var res = await bt.Run();
+            var bt = new BackTestRunner(MarketDataService, Mediator, NullLogger);
+            await bt.InitMarketData(_dataSources);
+            var res = await bt.Run(_backTestParams);
 
             DumpResults(res);
 

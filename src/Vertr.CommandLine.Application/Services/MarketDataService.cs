@@ -51,7 +51,7 @@ namespace Vertr.CommandLine.Application.Services
         public Task<CandleRange?> GetCandleRange(string symbol)
         {
             _storage.TryGetValue(symbol, out var candles);
-            var range = candles.GetRange();
+            var range = candles.GetRange(symbol);
 
             return Task.FromResult(range);
         }

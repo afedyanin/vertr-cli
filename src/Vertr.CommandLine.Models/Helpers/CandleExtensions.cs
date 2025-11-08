@@ -42,7 +42,7 @@ public static class CandleExtensions
         return shift <=0 ? filtered.First() : filtered.Last();
     }
 
-    public static CandleRange? GetRange(this IEnumerable<Candle>? candles)
+    public static CandleRange? GetRange(this IEnumerable<Candle>? candles, string symbol)
     {
         if (candles == null || !candles.Any())
         {
@@ -51,6 +51,7 @@ public static class CandleExtensions
 
         return new CandleRange
         {
+            Symbol = symbol,
             FirstDate = candles.First().TimeUtc,
             LastDate = candles.Last().TimeUtc,
             Count = candles.Count()

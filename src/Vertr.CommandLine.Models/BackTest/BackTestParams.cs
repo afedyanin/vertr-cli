@@ -8,8 +8,6 @@ public class BackTestParams
 
     public required string CurrencyCode { get; init; }
 
-    public required string DataSourceFilePath { get; init; }
-
     public int Steps { get; init; }
 
     public int Skip { get; init; }

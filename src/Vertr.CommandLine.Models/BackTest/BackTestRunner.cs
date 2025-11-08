@@ -9,39 +9,47 @@ namespace Vertr.CommandLine.Models.BackTest;
 
 public class BackTestRunner
 {
-    private readonly BackTestParams _backTestParams;
     private readonly IMediator _mediator;
     private readonly IMarketDataService _marketDataService;
     private readonly ILogger _logger;
+    private readonly Dictionary<string, CandleRange?> _candleRanges = [];
 
     public BackTestRunner(
-        BackTestParams backTestParams,
         IMarketDataService marketDataService,
         IMediator mediator,
         ILogger logger)
     {
-        _backTestParams = backTestParams;
         _marketDataService = marketDataService;
         _mediator = mediator;
         _logger = logger;
     }
 
-    public async Task<BackTestResult> Run()
+    public async Task InitMarketData(FileDataSource[] dataSources)
     {
-        var candles = CsvImporter.LoadCandles(_backTestParams.DataSourceFilePath);
-        await _marketDataService.LoadData(_backTestParams.Symbol, [.. candles]);
-        var timeIndex = await _marketDataService.GetEnumerable(_backTestParams.Symbol);
-        var candleRange = await _marketDataService.GetCandleRange(_backTestParams.Symbol);
+        _candleRanges.Clear();
+
+        foreach (var dataSource in dataSources)
+        {
+            var candles = CsvImporter.LoadCandles(dataSource.FilePath);
+            await _marketDataService.LoadData(dataSource.Symbol, [.. candles]);
+            _candleRanges[dataSource.Symbol] = await _marketDataService.GetCandleRange(dataSource.Symbol);
+        }
+    }
+
+    public async Task<BackTestResult> Run(BackTestParams backTestParams)
+    {
+        _candleRanges.TryGetValue(backTestParams.Symbol, out var candleRange);
         Trace.Assert(candleRange != null);
 
         var result = new BackTestResult();
 
         var stepCount = 0;
         var closeTime = candleRange.LastDate;
-        var maxSteps = _backTestParams.Steps > 0 ?
-            Math.Min(_backTestParams.Steps + _backTestParams.Skip, candleRange.Count) :
+        var maxSteps = backTestParams.Steps > 0 ?
+            Math.Min(backTestParams.Steps + backTestParams.Skip, candleRange.Count) :
             candleRange.Count;
 
+        var timeIndex = await _marketDataService.GetEnumerable(backTestParams.Symbol);
         foreach (var timeStep in timeIndex)
         {
             if (stepCount++ >= maxSteps)
@@ -50,29 +58,29 @@ public class BackTestRunner
                 break;
             }
 
-            if (stepCount < _backTestParams.Skip)
+            if (stepCount < backTestParams.Skip)
             {
                 continue;
             }
 
-            result.Items[timeStep] = await ExecuteStep(timeStep);
+            result.Items[timeStep] = await ExecuteStep(timeStep, backTestParams);
         }
 
-        result.FinalClosePositionsResult = await ClosePositionsStep(closeTime);
+        result.FinalClosePositionsResult = await ClosePositionsStep(closeTime, backTestParams);
 
         return result;
     }
 
-    private async Task<Dictionary<string, object>> ExecuteStep(DateTime timeStep)
+    private async Task<Dictionary<string, object>> ExecuteStep(DateTime timeStep, BackTestParams backTestParams)
     {
         var request = new BackTestExecuteStepRequest
         {
             Time = timeStep,
-            Symbol = _backTestParams.Symbol,
-            PortfolioId = _backTestParams.PortfolioId,
-            CurrencyCode = _backTestParams.CurrencyCode,
-            OpenPositionQty = _backTestParams.OpenPositionQty,
-            ComissionPercent = _backTestParams.ComissionPercent,
+            Symbol = backTestParams.Symbol,
+            PortfolioId = backTestParams.PortfolioId,
+            CurrencyCode = backTestParams.CurrencyCode,
+            OpenPositionQty = backTestParams.OpenPositionQty,
+            ComissionPercent = backTestParams.ComissionPercent,
         };
 
         var response = await _mediator.Send(request);
@@ -85,15 +93,15 @@ public class BackTestRunner
         return response.Items;
     }
 
-    private async Task<Dictionary<string, object>> ClosePositionsStep(DateTime closeDate)
+    private async Task<Dictionary<string, object>> ClosePositionsStep(DateTime closeDate, BackTestParams backTestParams)
     {
         var closeRequest = new BackTestClosePositionRequest
         {
             MarketTime = closeDate,
-            Symbol = _backTestParams.Symbol,
-            PortfolioId = _backTestParams.PortfolioId,
-            CurrencyCode = _backTestParams.CurrencyCode,
-            ComissionPercent = _backTestParams.ComissionPercent
+            Symbol = backTestParams.Symbol,
+            PortfolioId = backTestParams.PortfolioId,
+            CurrencyCode = backTestParams.CurrencyCode,
+            ComissionPercent = backTestParams.ComissionPercent
         };
 
         var closeResponse = await _mediator.Send(closeRequest);
