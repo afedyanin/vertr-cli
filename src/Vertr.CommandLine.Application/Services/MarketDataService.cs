@@ -55,5 +55,13 @@ namespace Vertr.CommandLine.Application.Services
 
             return Task.FromResult(range);
         }
+
+        public Task<Dictionary<DateOnly, CandleRange>> GetCandleRanges(string symbol)
+        {
+            _storage.TryGetValue(symbol, out var candles);
+            var range = candles.GetRanges(symbol);
+
+            return Task.FromResult(range);
+        }
     }
 }

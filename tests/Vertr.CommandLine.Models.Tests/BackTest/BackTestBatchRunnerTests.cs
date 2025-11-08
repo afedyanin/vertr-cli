@@ -20,10 +20,11 @@ public class BackTestBatchRunnerTests : SystemTestBase
             PortfolioId = Guid.NewGuid(),
             Symbol = "SBER",
             CurrencyCode = "RUB",
-            Steps = 30,
-            Skip = 10,
+            Steps = 500,
+            Skip = 10, // Ignored in batch run
             OpenPositionQty = 100,
-            ComissionPercent = 0.001m,
+            ComissionPercent = 0.00m,
+            Intraday = null // Ignored in batchByDay run
         };
 
     [Test]
@@ -39,6 +40,27 @@ public class BackTestBatchRunnerTests : SystemTestBase
         var avgTotal = summaries.Average(s => s.TotalAmount);
 
         Console.WriteLine($"AVG: Trading={avgTrading:c} Comissions={avgComissions:c} Total={avgTotal:c}");
+        Assert.Pass();
+    }
+
+    [Test]
+    public async Task CanRunBackTestBatchByDay()
+    {
+        var bt = new BackTestRunner(MarketDataService, Mediator, NullLogger);
+        await bt.InitMarketData(_dataSources);
+
+        var res = await bt.RunBatchByDay(_backTestParams, 20);
+
+        foreach (var kvp in res)
+        {
+            var summaries = kvp.Value.Select(r => r.GetSummary(_backTestParams.CurrencyCode));
+            var avgTrading = summaries.Average(s => s.TradingAmount);
+            var avgComissions = summaries.Average(s => s.Comissions);
+            var avgTotal = summaries.Average(s => s.TotalAmount);
+
+            Console.WriteLine($"Day={kvp.Key} AVG: Trading={avgTrading:c} Comissions={avgComissions:c} Total={avgTotal:c}");
+        }
+
         Assert.Pass();
     }
 }

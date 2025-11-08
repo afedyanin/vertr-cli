@@ -21,7 +21,7 @@ public class CandleExtensionsTests
 
         Assert.Pass();
     }
-    
+
     [Test]
     public void CanGetCandlesEqualOrGreatherThanAfter()
     {
@@ -59,6 +59,23 @@ public class CandleExtensionsTests
         Console.WriteLine($"\nSelected time={time.ToString("s")}:\n{Dump([selected])}");
 
         Assert.Pass();
+    }
+
+    [Test]
+    public void CanGroupCandlesByDay()
+    {
+        var startTime = new DateTime(2025, 11, 7);
+        var step = TimeSpan.FromHours(5);
+
+        var candels = CreateCandles(41, startTime, step);
+        Console.WriteLine($"Base:\n{Dump(candels)}");
+
+        var grouped = candels.GetRanges("SBER");
+
+        foreach (var kvp in grouped)
+        {
+            Console.WriteLine($"{kvp.Key}={kvp.Value}");
+        }
     }
 
     private static Candle[] CreateCandles(int count, DateTime startDate, TimeSpan step)

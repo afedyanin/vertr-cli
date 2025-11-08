@@ -11,4 +11,6 @@ public interface IMarketDataService
     public Task LoadData(string symbol, Candle[] candles);
 
     public Task<CandleRange?> GetCandleRange(string symbol);
+
+    public Task<Dictionary<DateOnly, CandleRange>> GetCandleRanges(string symbol);
 }

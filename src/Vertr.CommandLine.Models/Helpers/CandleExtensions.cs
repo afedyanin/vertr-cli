@@ -57,4 +57,23 @@ public static class CandleExtensions
             Count = candles.Count()
         };
     }
+
+    public static Dictionary<DateOnly, CandleRange> GetRanges(this IEnumerable<Candle>? candles, string symbol)
+    {
+        if (candles == null || !candles.Any())
+        {
+            return [];
+        }
+
+        return candles
+           .GroupBy(c => DateOnly.FromDateTime(c.TimeUtc))
+           .Select(group => new CandleRange
+           {
+               Symbol = symbol,
+               FirstDate = group.OrderBy(item => item.TimeUtc).First().TimeUtc,
+               LastDate = group.OrderByDescending(item => item.TimeUtc).First().TimeUtc,
+               Count = group.Count()
+           })
+           .ToDictionary(c => DateOnly.FromDateTime(c.FirstDate));
+    }
 }

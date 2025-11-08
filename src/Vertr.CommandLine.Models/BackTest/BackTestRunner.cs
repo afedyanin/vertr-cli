@@ -52,6 +52,13 @@ public class BackTestRunner
         var timeIndex = await _marketDataService.GetEnumerable(backTestParams.Symbol);
         foreach (var timeStep in timeIndex)
         {
+            var date = DateOnly.FromDateTime(timeStep.Date);
+
+            if (backTestParams.Intraday.HasValue && date != backTestParams.Intraday.Value)
+            {
+                continue;
+            }
+
             if (stepCount++ >= maxSteps)
             {
                 closeTime = timeStep;
@@ -77,7 +84,7 @@ public class BackTestRunner
         Trace.Assert(candleRange != null);
 
         var results = new List<BackTestResult>();
-        foreach (var btParams in CreateBackTestBatchParams(batchCount, backTestParams, candleRange))
+        foreach (var btParams in CreateBackTestBatchParams(batchCount, backTestParams, candleRange, backTestParams.Intraday))
         {
             var res = await Run(btParams);
             results.Add(res);
@@ -86,7 +93,33 @@ public class BackTestRunner
         return results;
     }
 
-    private IEnumerable<BackTestParams> CreateBackTestBatchParams(int paramsCount, BackTestParams template, CandleRange candleRange)
+    public async Task<Dictionary<DateOnly, IEnumerable<BackTestResult>>> RunBatchByDay(BackTestParams backTestParams, int batchCount)
+    {
+        var ranges = await _marketDataService.GetCandleRanges(backTestParams.Symbol);
+
+        var dailyRes = new Dictionary<DateOnly, IEnumerable<BackTestResult>>();
+
+        foreach (var range in ranges)
+        {
+            var results = new List<BackTestResult>();
+            
+            foreach (var btParams in CreateBackTestBatchParams(batchCount, backTestParams, range.Value, range.Key))
+            {
+                var res = await Run(btParams);
+                results.Add(res);
+            }
+
+            dailyRes[range.Key] = results;
+        }
+
+        return dailyRes;
+    }
+
+    private IEnumerable<BackTestParams> CreateBackTestBatchParams(
+        int paramsCount, 
+        BackTestParams template, 
+        CandleRange candleRange,
+        DateOnly? intraday)
     {
         var res = new List<BackTestParams>();
 
@@ -101,7 +134,7 @@ public class BackTestRunner
                 Skip = Random.Shared.Next(0, candleRange.Count - template.Steps),
                 OpenPositionQty = template.OpenPositionQty,
                 ComissionPercent = template.ComissionPercent,
-                Intraday = template.Intraday, // ??
+                Intraday = intraday
             };
 
             res.Add(btParams);
