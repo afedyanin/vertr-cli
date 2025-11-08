@@ -17,7 +17,8 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
 
     public async Task<BackTestExecuteStepResponse> Handle(BackTestExecuteStepRequest request, CancellationToken cancellationToken = default)
     {
-        var rb = new BackTestExecuteStepResponseBuilder();
+        var rb = new BackTestExecuteStepResponseBuilder()
+            .WithMarketTime(request.Time);
 
         var predictionRequest = new PredictionRequest
         {
@@ -86,7 +87,8 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
             PortfolioId = request.PortfolioId,
             Symbol = request.Symbol,
             Direction = direction,
-            MarketTime = request.Time
+            MarketTime = request.Time,
+            OpenPositionQty = request.OpenPositionQty,
         };
 
         var tradingSignalResponse = await _mediator.Send(tradingSignalRequest, cancellationToken);

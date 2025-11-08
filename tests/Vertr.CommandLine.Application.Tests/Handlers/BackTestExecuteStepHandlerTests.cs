@@ -1,3 +1,4 @@
+using Vertr.CommandLine.Models.Helpers;
 using Vertr.CommandLine.Models.Requests.BackTest;
 
 namespace Vertr.CommandLine.Application.Tests.Handlers;
@@ -19,6 +20,6 @@ public class BackTestExecuteStepHandlerTests : AppliactionTestBase
 
         Assert.That(res, Is.Not.Null);
 
-        Console.WriteLine(DictionaryHelper.DumpItems(res.Items));
+        Console.WriteLine(BackTestResultExtensions.DumpItems(res.Items));
     }
 }

@@ -39,6 +39,12 @@ namespace Vertr.CommandLine.Application.Handlers.BackTest
             return this;
         }
 
+        public BackTestExecuteStepResponseBuilder WithMarketTime(DateTime marketTime)
+        {
+            _items[BackTestContextKeys.MarketTime] = marketTime;
+            return this;
+        }
+
         public BackTestExecuteStepResponseBuilder WithPredictedPrice(decimal price)
         {
             _items[BackTestContextKeys.PredictedPrice] = price;

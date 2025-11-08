@@ -1,4 +1,5 @@
 ﻿using Vertr.CommandLine.Models;
+using Vertr.CommandLine.Models.Helpers;
 using Vertr.CommandLine.Models.Requests.BackTest;
 
 namespace Vertr.CommandLine.Application.Tests.Handlers
@@ -18,7 +19,7 @@ namespace Vertr.CommandLine.Application.Tests.Handlers
 
             var res = await Mediator.Send(request);
             Assert.That(res, Is.Not.Null);
-            Console.WriteLine($"Before close:\n {DictionaryHelper.DumpItems(res.Items)}");
+            Console.WriteLine($"Before close:\n {BackTestResultExtensions.DumpItems(res.Items)}");
 
             var closeRequest = new BackTestClosePositionRequest
             {
@@ -31,7 +32,7 @@ namespace Vertr.CommandLine.Application.Tests.Handlers
             var closeRes = await Mediator.Send(closeRequest);
 
             Assert.That(closeRes, Is.Not.Null);
-            Console.WriteLine($"\nAfter close:\n {DictionaryHelper.DumpItems(closeRes.Items)}");
+            Console.WriteLine($"\nAfter close:\n {BackTestResultExtensions.DumpItems(closeRes.Items)}");
 
             var positions = closeRes.Items[BackTestContextKeys.Positions] as Position[];
             Assert.That(positions, Is.Not.Null);

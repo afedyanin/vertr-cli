@@ -75,6 +75,7 @@ namespace Vertr.CommandLine.Application.Handlers.BackTest
 
             var items = new Dictionary<string, object>();
             items[BackTestContextKeys.Positions] = updatePositionsResponse.Positions;
+            items[BackTestContextKeys.MarketTime] = request.MarketTime;
 
             return new BackTestClosePostionResponse
             {

@@ -37,7 +37,9 @@ namespace Vertr.CommandLine.Application.Tests.Services
             var mds = new MarketDataService();
             await mds.LoadData("SBER", candels);
 
-            foreach(var time in mds.GetEnumerable("SBER")!)
+            var enumerable = await mds.GetEnumerable("SBER");
+
+            foreach (var time in enumerable)
             {
                 Console.WriteLine(time.ToString("s"));
             }

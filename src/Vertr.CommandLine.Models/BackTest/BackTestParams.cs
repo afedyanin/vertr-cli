@@ -9,4 +9,8 @@ public class BackTestParams
     public required string CurrencyCode { get; init; }
 
     public required string DataSourceFilePath { get; init; }
+
+    public int MaxSteps { get; init; }
+
+    public decimal OpenPositionQty { get; init; } = 100;
 }

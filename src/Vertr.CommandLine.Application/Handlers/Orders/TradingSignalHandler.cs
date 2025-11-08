@@ -9,8 +9,6 @@ namespace Vertr.CommandLine.Application.Handlers.Orders
         private readonly IPortfolioService _portfolioService;
         private readonly IMediator _mediator;
 
-        private readonly decimal _openQty = 100;
-
         public TradingSignalHandler(
             IPortfolioService portfolioService,
             IMediator mediator)
@@ -37,7 +35,7 @@ namespace Vertr.CommandLine.Application.Handlers.Orders
                 var openRequest = new PostOrderRequest
                 {
                     Symbol = request.Symbol,
-                    Qty = _openQty * (request.Direction == Direction.Buy ? 1 : -1),
+                    Qty = request.OpenPositionQty * (request.Direction == Direction.Buy ? 1 : -1),
                     MarketTime = request.MarketTime,
                 };
 

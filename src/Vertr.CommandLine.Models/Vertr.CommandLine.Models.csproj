@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Vertr.CommandLine.Common\Vertr.CommandLine.Common.csproj" />
   </ItemGroup>
 
+    <ItemGroup>
+	    <InternalsVisibleTo Include="Vertr.CommandLine.Application.Tests" />
+    </ItemGroup>
+
 </Project>

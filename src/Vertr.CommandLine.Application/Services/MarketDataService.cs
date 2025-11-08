@@ -8,14 +8,12 @@ namespace Vertr.CommandLine.Application.Services
     {
         private readonly Dictionary<string, Candle[]> _storage = [];
 
-        public IEnumerable<DateTime>? GetEnumerable(string symbol)
+        public Task<IEnumerable<DateTime>> GetEnumerable(string symbol)
         {
-            if (_storage.TryGetValue(symbol, out var candles))
-            {
-                return candles.GetTimeEnumerable();
-            }
+            _storage.TryGetValue(symbol, out var candles);
+            var enumerable = candles.GetTimeEnumerable();
 
-            return null;
+            return Task.FromResult(enumerable);
         }
         public Task<Candle[]> GetCandles(string symbol, DateTime before, int count = 1)
         {
@@ -50,17 +48,12 @@ namespace Vertr.CommandLine.Application.Services
             return Task.CompletedTask;
         }
 
-        public (DateTime?, DateTime?) GetTimeRange(string symbol)
+        public Task<CandleRange?> GetCandleRange(string symbol)
         {
-            if (_storage.TryGetValue(symbol, out var candles))
-            {
-                var from = candles.First().TimeUtc;
-                var to = candles.Last().TimeUtc;
+            _storage.TryGetValue(symbol, out var candles);
+            var range = candles.GetRange();
 
-                return (from, to);
-            }
-
-            return (null, null);
+            return Task.FromResult(range);
         }
     }
 }

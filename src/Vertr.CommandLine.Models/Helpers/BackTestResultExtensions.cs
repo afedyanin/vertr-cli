@@ -1,12 +1,23 @@
 ﻿using System.Text;
-using Vertr.CommandLine.Models;
+using Vertr.CommandLine.Models.BackTest;
 using Vertr.CommandLine.Models.Requests.BackTest;
 
-namespace Vertr.CommandLine.Application.Tests
+namespace Vertr.CommandLine.Models.Helpers
 {
-    internal static class DictionaryHelper
+    public static class BackTestResultExtensions
     {
-        public static string DumpItems(IDictionary<string, object> items)
+        public static string DumpLastStep(this BackTestResult backTestResult)
+        {
+            var last = backTestResult.Items.Keys.OrderBy(k => k).Last(); 
+            return DumpItems(backTestResult.Items[last]);
+        }
+
+        public static string DumpCloseStep(this BackTestResult backTestResult)
+        {
+            return DumpItems(backTestResult.FinalClosePositionsResult ?? []);
+        }
+
+        internal static string DumpItems(IDictionary<string, object> items)
         {
             var sb = new StringBuilder();
 

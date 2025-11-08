@@ -28,42 +28,59 @@ public class BackTestRunner
 
     public async Task<BackTestResult> Run()
     {
-        var result = new BackTestResult();
-        
         var candles = CsvImporter.LoadCandles(_backTestParams.DataSourceFilePath);
-        Debug.Assert(candles != null);
-
         await _marketDataService.LoadData(_backTestParams.Symbol, [.. candles]);
+        var timeIndex = await _marketDataService.GetEnumerable(_backTestParams.Symbol);
+        var candleRange = await _marketDataService.GetCandleRange(_backTestParams.Symbol);
+        Trace.Assert(candleRange != null);
 
-        var timeIndex = _marketDataService.GetEnumerable(_backTestParams.Symbol);
-        Debug.Assert(timeIndex != null);
+        var result = new BackTestResult();
+
+        var stepCount = 0;
+        var closeTime = candleRange.LastDate;
+        var maxSteps = Math.Min(_backTestParams.MaxSteps, candleRange.Count);
 
         foreach (var timeStep in timeIndex)
         {
-            var request = new BackTestExecuteStepRequest
+            if (stepCount++ >= maxSteps)
             {
-                Time = timeStep,
-                Symbol = _backTestParams.Symbol,
-                PortfolioId = _backTestParams.PortfolioId,
-                CurrencyCode = _backTestParams.CurrencyCode,
-            };
-
-            var response = await _mediator.Send(request);
-
-            if (response.HasErrors)
-            {
-                _logger.LogError(response.Exception, $"Step {timeStep:O}. Error:{response.Message}");
+                closeTime = timeStep;
+                break;
             }
-
-            result.Items[timeStep] = response.Items;
+            result.Items[timeStep] = await ExecuteStep(timeStep);
         }
 
-        (DateTime? first, DateTime? last) = _marketDataService.GetTimeRange(_backTestParams.Symbol);
-        Debug.Assert(last != null);
+        result.FinalClosePositionsResult = await ClosePositionsStep(closeTime);
 
+        return result;
+    }
+
+    private async Task<Dictionary<string, object>> ExecuteStep(DateTime timeStep)
+    {
+        var request = new BackTestExecuteStepRequest
+        {
+            Time = timeStep,
+            Symbol = _backTestParams.Symbol,
+            PortfolioId = _backTestParams.PortfolioId,
+            CurrencyCode = _backTestParams.CurrencyCode,
+            OpenPositionQty = _backTestParams.OpenPositionQty,
+        };
+
+        var response = await _mediator.Send(request);
+
+        if (response.HasErrors)
+        {
+            _logger.LogError(response.Exception, $"Step {timeStep:O}. Error:{response.Message}");
+        }
+
+        return response.Items;
+    }
+
+    private async Task<Dictionary<string, object>> ClosePositionsStep(DateTime closeDate)
+    {
         var closeRequest = new BackTestClosePositionRequest
         {
-            MarketTime = last.Value,
+            MarketTime = closeDate,
             Symbol = _backTestParams.Symbol,
             PortfolioId = _backTestParams.PortfolioId,
             CurrencyCode = _backTestParams.CurrencyCode
@@ -73,12 +90,9 @@ public class BackTestRunner
 
         if (closeResponse.HasErrors)
         {
-            _logger.LogError(closeResponse.Exception, $"Step close. Error:{closeResponse.Message}");
+            _logger.LogError(closeResponse.Exception, $"Close positions step. Error:{closeResponse.Message}");
         }
 
-        // Перезатирает, нужно отдельно хранить
-        result.Items[last.Value] = closeResponse.Items;
-
-        return result;
+        return closeResponse.Items;
     }
 }

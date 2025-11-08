@@ -16,6 +16,8 @@ public class BackTestExecuteStepRequest : IRequest<BackTestExecuteStepResponse>
     public decimal PriceThreshold { get; init; }
 
     public required string CurrencyCode { get; init; }
+
+    public decimal OpenPositionQty {  get; init; }
 }
 
 public class BackTestExecuteStepResponse : ResponseBase
@@ -32,4 +34,5 @@ public static class BackTestContextKeys
     public const string Positions = "Positions";
     public const string Trades = "Trades";
     public const string Message = "Message";
+    public const string MarketTime = "MarketTime";
 }

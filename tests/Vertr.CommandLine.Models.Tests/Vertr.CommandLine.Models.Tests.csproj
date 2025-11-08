@@ -18,15 +18,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Vertr.CommandLine.Models\Vertr.CommandLine.Models.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Data\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Vertr.CommandLine.Application\Vertr.CommandLine.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

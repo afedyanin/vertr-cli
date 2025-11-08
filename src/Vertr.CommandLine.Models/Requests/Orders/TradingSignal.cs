@@ -11,6 +11,8 @@ public class TradingSignalRequest : IRequest<TradingSignalResponse>
     public Direction Direction { get; init; }
 
     public DateTime? MarketTime { get; init; }
+
+    public decimal OpenPositionQty { get; init; }
 }
 
 public class TradingSignalResponse : ResponseBase
