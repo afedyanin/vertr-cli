@@ -40,8 +40,8 @@ internal class PortfolioService : IPortfolioService
             _portfolios[portfolioId] = portfolio;
         }
 
-        var currencyPosition = portfolio.GetOrCreatePosition($"{currencyCode}.trading");
-        var comissionsPosition = portfolio.GetOrCreatePosition($"{currencyCode}.comissions");
+        var currencyPosition = portfolio.GetOrCreatePosition(Position.GetTradingPositionKey(currencyCode));
+        var comissionsPosition = portfolio.GetOrCreatePosition(Position.GetComissionsPositionKey(currencyCode));
         var tradingPosition = portfolio.GetOrCreatePosition(symbol);
 
 

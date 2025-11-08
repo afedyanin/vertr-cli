@@ -6,6 +6,27 @@ namespace Vertr.CommandLine.Models.Helpers
 {
     public static class BackTestResultExtensions
     {
+        public static PositionSummary GetSummary(this BackTestResult backTestResult, string currencyCode)
+        {
+            var lastItems = backTestResult.FinalClosePositionsResult ?? [];
+
+            if (lastItems.Count == 0)
+            {
+                var timeStep = backTestResult.Items.Keys.OrderBy(k => k).Last();
+                backTestResult.Items.TryGetValue(timeStep, out var items);
+
+                if (items != null && items.Count != 0)
+                {
+                    lastItems = items;
+                }
+            }
+
+            lastItems.TryGetValue(BackTestContextKeys.Positions, out var positionsObj);
+            var positions = positionsObj as Position[];
+
+            return positions.GetSummary(currencyCode);
+        }
+
         public static string DumpLastStep(this BackTestResult backTestResult)
         {
             return backTestResult.DumpStep(backTestResult.Items.Keys.OrderBy(k => k).Last());
@@ -88,5 +109,7 @@ namespace Vertr.CommandLine.Models.Helpers
 
             return sb.ToString();
         }
+
+
     }
 }

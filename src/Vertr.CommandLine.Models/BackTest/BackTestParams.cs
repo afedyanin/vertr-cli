@@ -10,7 +10,9 @@ public class BackTestParams
 
     public required string DataSourceFilePath { get; init; }
 
-    public int MaxSteps { get; init; }
+    public int Steps { get; init; }
+
+    public int Skip { get; init; }
 
     public decimal OpenPositionQty { get; init; } = 100;
 

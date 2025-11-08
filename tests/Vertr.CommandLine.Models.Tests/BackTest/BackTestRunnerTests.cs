@@ -14,13 +14,14 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
                 Symbol = "SBER",
                 CurrencyCode = "RUB",
                 DataSourceFilePath = "Data\\SBER_251101_251104.csv",
-                MaxSteps = 30,
+                Steps = 3,
+                Skip = 10,
                 OpenPositionQty = 100,
-                ComissionPercent = 0.0m,
+                ComissionPercent = 0.001m,
             };
 
         [Test]
-        public async Task CanIterateBckTestSteps()
+        public async Task CanIterateBackTestSteps()
         {
             var candles = CsvImporter.LoadCandles(_backTestParams.DataSourceFilePath);
             Assert.That(candles, Is.Not.Null);
@@ -32,8 +33,10 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
 
             var stepCount = 0;
             var closeTime = candleRange.LastDate;
-            var maxSteps = Math.Min(_backTestParams.MaxSteps, candleRange.Count);
-
+            var maxSteps = _backTestParams.Steps > 0 ?
+                Math.Min(_backTestParams.Steps + _backTestParams.Skip, candleRange.Count) :
+                candleRange.Count;
+ 
             var timeIndex = await MarketDataService.GetEnumerable(_backTestParams.Symbol);
             Assert.That(timeIndex, Is.Not.Null);
 
@@ -43,6 +46,12 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
                 {
                     closeTime = timeStep;
                     break;
+                }
+
+                if (stepCount <= _backTestParams.Skip)
+                {
+                    Console.WriteLine($"Skipping Step={stepCount} Time={timeStep:s}");
+                    continue;
                 }
 
                 Console.WriteLine($"Step={stepCount} Time={timeStep:s}");
@@ -66,11 +75,14 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
             {
                 Console.WriteLine(result);
             }
-            */
-
             Console.WriteLine(res.DumpLastStep());
             Console.WriteLine("-----------------");
             Console.WriteLine(res.DumpCloseStep());
+
+             */
+
+            var summary = res.GetSummary(_backTestParams.CurrencyCode);
+            Console.WriteLine(summary);
 
             Assert.Pass();
         }
