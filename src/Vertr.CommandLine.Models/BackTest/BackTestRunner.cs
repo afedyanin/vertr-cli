@@ -38,7 +38,9 @@ public class BackTestRunner
 
         var stepCount = 0;
         var closeTime = candleRange.LastDate;
-        var maxSteps = Math.Min(_backTestParams.MaxSteps, candleRange.Count);
+        var maxSteps = _backTestParams.MaxSteps > 0 ?
+            Math.Min(_backTestParams.MaxSteps, candleRange.Count) : 
+            candleRange.Count;
 
         foreach (var timeStep in timeIndex)
         {

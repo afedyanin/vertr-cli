@@ -1,30 +1,39 @@
-﻿using Vertr.CommandLine.Models.BackTest;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Vertr.CommandLine.Models.BackTest;
 using Vertr.CommandLine.Models.Helpers;
 
 namespace Vertr.CommandLine.Models.Tests.BackTest
 {
     public class BackTestRunnerTests : SystemTestBase
     {
-        private const string _csvFilePath = "Data\\SBER_251101_251104.csv";
-        private const string _symbol = "SBER";
-        private readonly int _maxSteps = 10000;
+        private static readonly BackTestParams _backTestParams = 
+            new BackTestParams
+            {
+                PortfolioId = Guid.NewGuid(),
+                Symbol = "SBER",
+                CurrencyCode = "RUB",
+                DataSourceFilePath = "Data\\SBER_251101_251104.csv",
+                MaxSteps = 10,
+                OpenPositionQty = 100
+            };
 
         [Test]
         public async Task CanIterateBckTestSteps()
         {
-            var candles = CsvImporter.LoadCandles(_csvFilePath);
+            var candles = CsvImporter.LoadCandles(_backTestParams.DataSourceFilePath);
             Assert.That(candles, Is.Not.Null);
-            await MarketDataService.LoadData(_symbol, [.. candles]);
+            await MarketDataService.LoadData(_backTestParams.Symbol, [.. candles]);
 
-            var candleRange = await MarketDataService.GetCandleRange(_symbol);
+            var candleRange = await MarketDataService.GetCandleRange(_backTestParams.Symbol);
             Assert.That(candleRange, Is.Not.Null);
             Console.WriteLine($"CandleRange={candleRange}");
 
             var stepCount = 0;
             var closeTime = candleRange.LastDate;
-            var maxSteps = Math.Min(_maxSteps, candleRange.Count);
+            var maxSteps = Math.Min(_backTestParams.MaxSteps, candleRange.Count);
 
-            var timeIndex = await MarketDataService.GetEnumerable(_symbol);
+            var timeIndex = await MarketDataService.GetEnumerable(_backTestParams.Symbol);
             Assert.That(timeIndex, Is.Not.Null);
 
             foreach (var timeStep in timeIndex)
@@ -39,6 +48,21 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
             }
            
             Console.WriteLine($"CloseTime={closeTime:s}");
+
+            Assert.Pass();
+        }
+
+        [Test]
+        public async Task CanRunBacktest()
+        {
+            var logger = NullLoggerFactory.Instance.CreateLogger<BackTestRunnerTests>();
+            var bt = new BackTestRunner(_backTestParams, MarketDataService, Mediator, logger);
+
+            var res = await bt.Run();
+
+            Console.WriteLine(res.DumpLastStep());
+            Console.WriteLine("-----------------");
+            Console.WriteLine(res.DumpCloseStep());
 
             Assert.Pass();
         }
