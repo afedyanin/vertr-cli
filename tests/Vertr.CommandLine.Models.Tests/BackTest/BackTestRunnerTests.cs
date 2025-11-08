@@ -20,7 +20,7 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
                 PortfolioId = Guid.NewGuid(),
                 Symbol = "SBER",
                 CurrencyCode = "RUB",
-                Steps = 3,
+                Steps = 0,
                 Skip = 10,
                 OpenPositionQty = 100,
                 ComissionPercent = 0.001m,
@@ -71,7 +71,7 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
         [Test]
         public async Task CanRunBackTest()
         {
-            var bt = new BackTestRunner(MarketDataService, Mediator, NullLogger);
+            var bt = new BackTestRunner(MarketDataService, PortfolioService, Mediator, NullLogger);
             await bt.InitMarketData(_dataSources);
             var res = await bt.Run(_backTestParams);
 
@@ -85,13 +85,16 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
 
         private static void DumpResults(BackTestResult? backTestResult)
         {
-            /*
             foreach (var result in backTestResult.DumpAll())
             {
-                Console.WriteLine(result);
-            }*/
+                // Console.WriteLine(result);
+            }
+
+
+            Console.WriteLine("LAST STEP:");
             Console.WriteLine(backTestResult.DumpLastStep());
-            Console.WriteLine("-----------------");
+            
+            Console.WriteLine("\nCLOSE STEP:");
             Console.WriteLine(backTestResult.DumpCloseStep());
         }
     }

@@ -11,15 +11,18 @@ public class BackTestRunner
 {
     private readonly IMediator _mediator;
     private readonly IMarketDataService _marketDataService;
+    private readonly IPortfolioService _portfolioService;
     private readonly ILogger _logger;
     private readonly Dictionary<string, CandleRange?> _candleRanges = [];
 
     public BackTestRunner(
         IMarketDataService marketDataService,
+        IPortfolioService portfolioService,
         IMediator mediator,
         ILogger logger)
     {
         _marketDataService = marketDataService;
+        _portfolioService = portfolioService;
         _mediator = mediator;
         _logger = logger;
     }
@@ -46,8 +49,8 @@ public class BackTestRunner
         var stepCount = 0;
         var closeTime = candleRange.LastDate;
         var maxSteps = backTestParams.Steps > 0 ?
-            Math.Min(backTestParams.Steps + backTestParams.Skip, candleRange.Count) :
-            candleRange.Count;
+            Math.Min(backTestParams.Steps + backTestParams.Skip, candleRange.Count - 1) :
+            candleRange.Count - 1; // оставить одну свечку, чтобы закрыть позицию
 
         var timeIndex = await _marketDataService.GetEnumerable(backTestParams.Symbol);
         foreach (var timeStep in timeIndex)
@@ -74,6 +77,7 @@ public class BackTestRunner
         }
 
         result.FinalClosePositionsResult = await ClosePositionsStep(closeTime, backTestParams);
+        result.Positions = _portfolioService.GetPositions(backTestParams.PortfolioId);
 
         return result;
     }

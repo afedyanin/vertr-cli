@@ -9,18 +9,15 @@ namespace Vertr.CommandLine.Application.Handlers.BackTest
         private readonly IPortfolioService _portfolioService;
         private readonly IOrderExecutionService _orderExecutionService;
         private readonly IMarketDataService _marketDataService;
-        private readonly IMediator _mediator;
 
         public BackTestClosePositionHandler(
             IPortfolioService portfolioService,
             IOrderExecutionService orderExecutionService,
-            IMarketDataService marketDataService,
-            IMediator mediator)
+            IMarketDataService marketDataService)
         {
             _portfolioService = portfolioService;
             _orderExecutionService = orderExecutionService;
             _marketDataService = marketDataService;
-            _mediator = mediator;
         }
 
         public async Task<BackTestClosePostionResponse> Handle(

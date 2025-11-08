@@ -15,6 +15,8 @@ public abstract class SystemTestBase
     protected IMediator Mediator => _serviceProvider.GetRequiredService<IMediator>();
     protected IMarketDataService MarketDataService => _serviceProvider.GetRequiredService<IMarketDataService>();
 
+    protected IPortfolioService PortfolioService => _serviceProvider.GetRequiredService<IPortfolioService>();
+
     protected ILogger NullLogger = NullLoggerFactory.Instance.CreateLogger<SystemTestBase>();
 
     protected SystemTestBase()
