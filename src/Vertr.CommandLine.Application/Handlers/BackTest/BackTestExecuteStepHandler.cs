@@ -1,17 +1,23 @@
 using Vertr.CommandLine.Common.Mediator;
+using Vertr.CommandLine.Models.Abstracttions;
 using Vertr.CommandLine.Models.Requests.BackTest;
-using Vertr.CommandLine.Models.Requests.MarketData;
 using Vertr.CommandLine.Models.Requests.Orders;
-using Vertr.CommandLine.Models.Requests.Portfolio;
 using Vertr.CommandLine.Models.Requests.Predictor;
 
 namespace Vertr.CommandLine.Application.Handlers.BackTest;
 public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepRequest, BackTestExecuteStepResponse>
 {
     private readonly IMediator _mediator;
+    private readonly IMarketDataService _marketDataService;
+    private readonly IPortfolioService _portfolioService;
 
-    public BackTestExecuteStepHandler(IMediator mediator)
+    public BackTestExecuteStepHandler(
+        IMarketDataService marketDataService,
+        IPortfolioService portfolioService,
+        IMediator mediator)
     {
+        _marketDataService = marketDataService;
+        _portfolioService = portfolioService;
         _mediator = mediator;
     }
 
@@ -47,32 +53,19 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
             .WithPredictedPrice(predictionResponse.PredictedPrice.Value)
             .WithCandle(predictionResponse.LastCandle);
 
-        var marketPriceRequest = new GetMarketPriceRequest
-        {
-            Symbol = request.Symbol,
-            Time = request.Time,
-        };
+        var marketPrice = await _marketDataService.GetMarketPrice(request.Symbol, request.Time);
 
-        var marketPriceResponse = await _mediator.Send(marketPriceRequest, cancellationToken);
-
-        if (marketPriceResponse.HasErrors)
-        {
-            return rb
-                .WithError(marketPriceResponse.Exception, $"Market price request failed with error: {marketPriceResponse.Message}")
-                .Build();
-        }
-
-        if (!marketPriceResponse.Price.HasValue)
+        if (!marketPrice.HasValue)
         {
             return rb
                 .WithMessage($"Market price is undefined.")
                 .Build();
         }
 
-        var direction = GetTradingDirection(marketPriceResponse.Price.Value, predictionResponse.PredictedPrice.Value, request.PriceThreshold);
+        var direction = GetTradingDirection(marketPrice.Value, predictionResponse.PredictedPrice.Value, request.PriceThreshold);
 
         rb = rb
-            .WithMarketPrice(marketPriceResponse.Price.Value)
+            .WithMarketPrice(marketPrice.Value)
             .WithSignal(direction);
 
         if (direction == 0)
@@ -112,25 +105,21 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
 
         rb = rb.WithTrades(trades);
 
-        var updatePositionsRequest = new UpdatePositionsRequest
-        {
-            Symbol = request.Symbol,
-            PortfolioId = request.PortfolioId,
-            Trades = trades,
-            CurrencyCode = request.CurrencyCode,
-        };
+        var positions = _portfolioService.Update(
+            request.PortfolioId,
+            request.Symbol,
+            trades,
+            request.CurrencyCode);
 
-        var updatePositionsResponse = await _mediator.Send(updatePositionsRequest, cancellationToken);
-
-        if (updatePositionsResponse.HasErrors)
+        if (positions.Length <= 0)
         {
             return rb
-                .WithError(updatePositionsResponse.Exception, $"Update positions request failed with error: {updatePositionsResponse.Message}")
+                .WithMessage($"No positions updated.")
                 .Build();
         }
 
         return rb
-            .WithPositions(updatePositionsResponse.Positions)
+            .WithPositions(positions)
             .Build();
     }
 

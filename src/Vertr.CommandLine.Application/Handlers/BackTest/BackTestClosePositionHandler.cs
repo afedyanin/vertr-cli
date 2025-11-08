@@ -1,7 +1,6 @@
 ﻿using Vertr.CommandLine.Common.Mediator;
 using Vertr.CommandLine.Models.Abstracttions;
 using Vertr.CommandLine.Models.Requests.BackTest;
-using Vertr.CommandLine.Models.Requests.Portfolio;
 
 namespace Vertr.CommandLine.Application.Handlers.BackTest
 {
@@ -62,29 +61,17 @@ namespace Vertr.CommandLine.Application.Handlers.BackTest
                 };
             }
 
-            var updatePositionsRequest = new UpdatePositionsRequest
-            {
-                Symbol = request.Symbol,
-                PortfolioId = request.PortfolioId,
-                Trades = trades,
-                CurrencyCode = request.CurrencyCode,
-            };
-
-            var updatePositionsResponse = await _mediator.Send(updatePositionsRequest, cancellationToken);
-
-            if (updatePositionsResponse.HasErrors)
-            {
-                return new BackTestClosePostionResponse
-                {
-                    Exception = updatePositionsResponse.Exception,
-                    Message = $"Update positions request failed with error: {updatePositionsResponse.Message}",
-                };
-            }
+            var positions = _portfolioService.Update(
+                request.PortfolioId,
+                request.Symbol,
+                trades,
+                request.CurrencyCode);
 
             var items = new Dictionary<string, object>();
-            items[BackTestContextKeys.Trades] = trades;
-            items[BackTestContextKeys.Positions] = updatePositionsResponse.Positions;
+
             items[BackTestContextKeys.MarketTime] = request.MarketTime;
+            items[BackTestContextKeys.Trades] = trades;
+            items[BackTestContextKeys.Positions] = positions;
 
             return new BackTestClosePostionResponse
             {

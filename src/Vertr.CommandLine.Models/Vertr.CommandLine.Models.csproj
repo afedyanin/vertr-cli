@@ -19,4 +19,8 @@
 	    <InternalsVisibleTo Include="Vertr.CommandLine.Application.Tests" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Requests\Portfolio\" />
+    </ItemGroup>
+
 </Project>
