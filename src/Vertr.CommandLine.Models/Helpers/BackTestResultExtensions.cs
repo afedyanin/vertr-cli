@@ -8,8 +8,25 @@ namespace Vertr.CommandLine.Models.Helpers
     {
         public static string DumpLastStep(this BackTestResult backTestResult)
         {
-            var last = backTestResult.Items.Keys.OrderBy(k => k).Last(); 
-            return DumpItems(backTestResult.Items[last]);
+            return backTestResult.DumpStep(backTestResult.Items.Keys.OrderBy(k => k).Last());
+        }
+
+        public static IEnumerable<string> DumpAll(this BackTestResult backTestResult)
+        {
+            var res = new List<string>();
+
+            foreach (var item in backTestResult.Items)
+            {
+                res.Add(DumpItems(item.Value));
+            }
+
+            return res;
+        }
+
+        public static string DumpStep(this BackTestResult backTestResult, DateTime timeStep)
+        {
+            backTestResult.Items.TryGetValue(timeStep, out var items);
+            return DumpItems(items);
         }
 
         public static string DumpCloseStep(this BackTestResult backTestResult)
@@ -17,8 +34,13 @@ namespace Vertr.CommandLine.Models.Helpers
             return DumpItems(backTestResult.FinalClosePositionsResult ?? []);
         }
 
-        internal static string DumpItems(IDictionary<string, object> items)
+        internal static string DumpItems(IDictionary<string, object>? items)
         {
+            if (items == null)
+            {
+                return string.Empty;
+            }
+
             var sb = new StringBuilder();
 
             foreach (var item in items)
