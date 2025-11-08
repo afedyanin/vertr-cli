@@ -71,6 +71,45 @@ public class BackTestRunner
         return result;
     }
 
+    public async Task<IEnumerable<BackTestResult>> RunBatch(BackTestParams backTestParams, int batchCount)
+    {
+        _candleRanges.TryGetValue(backTestParams.Symbol, out var candleRange);
+        Trace.Assert(candleRange != null);
+
+        var results = new List<BackTestResult>();
+        foreach (var btParams in CreateBackTestBatchParams(batchCount, backTestParams, candleRange))
+        {
+            var res = await Run(btParams);
+            results.Add(res);
+        }
+
+        return results;
+    }
+
+    private IEnumerable<BackTestParams> CreateBackTestBatchParams(int paramsCount, BackTestParams template, CandleRange candleRange)
+    {
+        var res = new List<BackTestParams>();
+
+        for (int i = 0; i <= paramsCount; i++)
+        {
+            var btParams = new BackTestParams
+            {
+                PortfolioId = Guid.NewGuid(),
+                Symbol = template.Symbol,
+                CurrencyCode = template.CurrencyCode,
+                Steps = template.Steps,
+                Skip = Random.Shared.Next(0, candleRange.Count - template.Steps),
+                OpenPositionQty = template.OpenPositionQty,
+                ComissionPercent = template.ComissionPercent,
+                Intraday = template.Intraday, // ??
+            };
+
+            res.Add(btParams);
+        }
+
+        return res;
+    }
+
     private async Task<Dictionary<string, object>> ExecuteStep(DateTime timeStep, BackTestParams backTestParams)
     {
         var request = new BackTestExecuteStepRequest
