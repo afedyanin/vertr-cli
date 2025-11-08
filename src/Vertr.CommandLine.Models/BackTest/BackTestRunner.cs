@@ -66,6 +66,7 @@ public class BackTestRunner
             PortfolioId = _backTestParams.PortfolioId,
             CurrencyCode = _backTestParams.CurrencyCode,
             OpenPositionQty = _backTestParams.OpenPositionQty,
+            ComissionPercent = _backTestParams.ComissionPercent,
         };
 
         var response = await _mediator.Send(request);
@@ -85,7 +86,8 @@ public class BackTestRunner
             MarketTime = closeDate,
             Symbol = _backTestParams.Symbol,
             PortfolioId = _backTestParams.PortfolioId,
-            CurrencyCode = _backTestParams.CurrencyCode
+            CurrencyCode = _backTestParams.CurrencyCode,
+            ComissionPercent = _backTestParams.ComissionPercent
         };
 
         var closeResponse = await _mediator.Send(closeRequest);

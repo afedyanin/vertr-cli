@@ -15,7 +15,8 @@ namespace Vertr.CommandLine.Models.Tests.BackTest
                 CurrencyCode = "RUB",
                 DataSourceFilePath = "Data\\SBER_251101_251104.csv",
                 MaxSteps = 10,
-                OpenPositionQty = 100
+                OpenPositionQty = 100,
+                ComissionPercent = 0.003m,
             };
 
         [Test]

@@ -7,14 +7,17 @@ namespace Vertr.CommandLine.Application.Handlers.Orders
     public class TradingSignalHandler : IRequestHandler<TradingSignalRequest, TradingSignalResponse>
     {
         private readonly IPortfolioService _portfolioService;
-        private readonly IMediator _mediator;
+        private readonly IOrderExecutionService _orderExecutionService;
+        private readonly IMarketDataService _marketDataService;
 
         public TradingSignalHandler(
             IPortfolioService portfolioService,
-            IMediator mediator)
+            IOrderExecutionService orderExecutionService,
+            IMarketDataService marketDataService)
         {
             _portfolioService = portfolioService;
-            _mediator = mediator;
+            _orderExecutionService = orderExecutionService;
+            _marketDataService = marketDataService;
         }
 
         public async Task<TradingSignalResponse> Handle(TradingSignalRequest request, CancellationToken cancellationToken = default)
@@ -28,22 +31,30 @@ namespace Vertr.CommandLine.Application.Handlers.Orders
             }
 
             var position = _portfolioService.GetPosition(request.PortfolioId, request.Symbol);
+            var nextMarketPrice = await _marketDataService.GetMarketPrice(request.Symbol, request.MarketTime, shift: 1);
+
+            if (nextMarketPrice == null)
+            {
+                return new TradingSignalResponse()
+                {
+                    Message = "Cannot get next market price to post order. Skipping signal."
+                };
+            }
 
             // Open position
             if (position == null || position.Qty == 0)
             {
-                var openRequest = new PostOrderRequest
-                {
-                    Symbol = request.Symbol,
-                    Qty = request.OpenPositionQty * (request.Direction == Direction.Buy ? 1 : -1),
-                    MarketTime = request.MarketTime,
-                };
+                var qty = request.OpenPositionQty * (request.Direction == Direction.Buy ? 1 : -1);
 
-                var openResponse = await _mediator.Send(openRequest, cancellationToken);
+                var trades = await _orderExecutionService.PostOrder(
+                    request.Symbol,
+                    qty,
+                    nextMarketPrice.Value,
+                    request.ComissionPercent);
 
                 return new TradingSignalResponse()
                 {
-                    Trades = openResponse.Trades,
+                    Trades = trades,
                 };
             }
 
@@ -58,18 +69,17 @@ namespace Vertr.CommandLine.Application.Handlers.Orders
             }
 
             // Reverse
-            var reverseRequest = new PostOrderRequest
-            {
-                Symbol = request.Symbol,
-                Qty = position.Qty * (request.Direction == Direction.Buy ? 2 : -2),
-                MarketTime = request.MarketTime,
-            };
+            var reverseQty = position.Qty * (request.Direction == Direction.Buy ? 2 : -2);
 
-            var reverseResponse = await _mediator.Send(reverseRequest, cancellationToken);
+            var reverseTrades = await _orderExecutionService.PostOrder(
+                request.Symbol,
+                reverseQty,
+                nextMarketPrice.Value,
+                request.ComissionPercent);
 
             return new TradingSignalResponse()
             {
-                Trades = reverseResponse.Trades,
+                Trades = reverseTrades,
             };
         }
     }

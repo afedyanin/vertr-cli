@@ -89,6 +89,7 @@ public class BackTestExecuteStepHandler : IRequestHandler<BackTestExecuteStepReq
             Direction = direction,
             MarketTime = request.Time,
             OpenPositionQty = request.OpenPositionQty,
+            ComissionPercent = request.ComissionPercent,
         };
 
         var tradingSignalResponse = await _mediator.Send(tradingSignalRequest, cancellationToken);

@@ -14,7 +14,9 @@ namespace Vertr.CommandLine.Application.Tests.Handlers
                 Symbol = "SBER",
                 CurrencyCode = "RUB",
                 PortfolioId = Guid.NewGuid(),
-                Time = new DateTime(2025, 11, 1, 0, 0, 0, DateTimeKind.Utc)
+                Time = new DateTime(2025, 11, 1, 0, 0, 0, DateTimeKind.Utc),
+                ComissionPercent = 0.003m,
+                OpenPositionQty = 100,
             };
 
             var res = await Mediator.Send(request);
@@ -27,6 +29,7 @@ namespace Vertr.CommandLine.Application.Tests.Handlers
                 PortfolioId = request.PortfolioId,
                 Symbol = request.Symbol,
                 MarketTime = request.Time.AddMinutes(1),
+                ComissionPercent = request.ComissionPercent,
             };
 
             var closeRes = await Mediator.Send(closeRequest);

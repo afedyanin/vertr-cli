@@ -8,6 +8,7 @@ public class BackTestClosePositionRequest : IRequest<BackTestClosePostionRespons
     public required string Symbol { get; init; }
     public DateTime MarketTime { get; init; }
     public required string CurrencyCode { get; init; }
+    public decimal ComissionPercent { get; init; }
 }
 
 

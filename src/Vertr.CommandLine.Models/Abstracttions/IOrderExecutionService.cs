@@ -6,5 +6,6 @@ public interface IOrderExecutionService
     public Task<Trade[]> PostOrder(
         string symbol, 
         decimal qty,
-        DateTime? marketTime = null);
+        decimal price,
+        decimal comissionPercent);
 }

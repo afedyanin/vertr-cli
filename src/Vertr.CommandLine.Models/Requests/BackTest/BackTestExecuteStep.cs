@@ -18,6 +18,8 @@ public class BackTestExecuteStepRequest : IRequest<BackTestExecuteStepResponse>
     public required string CurrencyCode { get; init; }
 
     public decimal OpenPositionQty {  get; init; }
+
+    public decimal ComissionPercent { get; init; }
 }
 
 public class BackTestExecuteStepResponse : ResponseBase

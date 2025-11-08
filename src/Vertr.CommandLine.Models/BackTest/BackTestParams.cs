@@ -13,4 +13,6 @@ public class BackTestParams
     public int MaxSteps { get; init; }
 
     public decimal OpenPositionQty { get; init; } = 100;
+
+    public decimal ComissionPercent { get; init; } = 0.003m;
 }

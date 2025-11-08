@@ -1,8 +1,6 @@
 ﻿using Vertr.CommandLine.Common.Mediator;
-using Vertr.CommandLine.Models;
 using Vertr.CommandLine.Models.Abstracttions;
 using Vertr.CommandLine.Models.Requests.BackTest;
-using Vertr.CommandLine.Models.Requests.Orders;
 using Vertr.CommandLine.Models.Requests.Portfolio;
 
 namespace Vertr.CommandLine.Application.Handlers.BackTest
@@ -10,16 +8,21 @@ namespace Vertr.CommandLine.Application.Handlers.BackTest
     public class BackTestClosePositionHandler : IRequestHandler<BackTestClosePositionRequest, BackTestClosePostionResponse>
     {
         private readonly IPortfolioService _portfolioService;
+        private readonly IOrderExecutionService _orderExecutionService;
+        private readonly IMarketDataService _marketDataService;
         private readonly IMediator _mediator;
 
         public BackTestClosePositionHandler(
             IPortfolioService portfolioService,
+            IOrderExecutionService orderExecutionService,
+            IMarketDataService marketDataService,
             IMediator mediator)
         {
             _portfolioService = portfolioService;
+            _orderExecutionService = orderExecutionService;
+            _marketDataService = marketDataService;
             _mediator = mediator;
         }
-
 
         public async Task<BackTestClosePostionResponse> Handle(
             BackTestClosePositionRequest request, 
@@ -35,16 +38,21 @@ namespace Vertr.CommandLine.Application.Handlers.BackTest
                 };
             }
 
-            var closeRequest = new PostOrderRequest
+            var marketPrice = await _marketDataService.GetMarketPrice(request.Symbol, request.MarketTime, shift: 0);
+
+            if (marketPrice == null)
             {
-                Symbol = request.Symbol,
-                Qty = position.Qty * (-1),
-                MarketTime = request.MarketTime,
-            };
+                return new BackTestClosePostionResponse()
+                {
+                    Message = "Cannot get market price to post order. Skipping request."
+                };
+            }
 
-            var closeResponse = await _mediator.Send(closeRequest, cancellationToken);
-
-            var trades = closeResponse.Trades;
+            var trades = await _orderExecutionService.PostOrder(
+                request.Symbol,
+                position.Qty * (-1),
+                marketPrice.Value,
+                request.ComissionPercent);
 
             if (trades == null || trades.Length <= 0)
             {
@@ -74,6 +82,7 @@ namespace Vertr.CommandLine.Application.Handlers.BackTest
             }
 
             var items = new Dictionary<string, object>();
+            items[BackTestContextKeys.Trades] = trades;
             items[BackTestContextKeys.Positions] = updatePositionsResponse.Positions;
             items[BackTestContextKeys.MarketTime] = request.MarketTime;
 
