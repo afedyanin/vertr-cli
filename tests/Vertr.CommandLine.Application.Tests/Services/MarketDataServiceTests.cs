@@ -60,7 +60,7 @@ namespace Vertr.CommandLine.Application.Tests.Services
             Assert.That(range, Is.Not.Null);
             Console.WriteLine($"Candle range: {range}");
 
-            var price = await mds.GetMarketPrice(_symbol, range.LastDate);
+            var price = await mds.GetMarketPrice(_symbol, range.LastDate, PriceType.Mid);
             Assert.That(price, Is.Not.Null);
         }
 
