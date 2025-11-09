@@ -10,7 +10,7 @@ public class BackTestBatchRunnerTests : SystemTestBase
         new FileDataSource
         {
             Symbol = "SBER",
-            FilePath = "Data\\SBER_251101_251104.csv",
+            FilePath = "Data\\SBER_251101_251109.csv",
         }
     };
 
@@ -20,10 +20,10 @@ public class BackTestBatchRunnerTests : SystemTestBase
             PortfolioId = Guid.NewGuid(),
             Symbol = "SBER",
             CurrencyCode = "RUB",
-            Steps = 0,
+            Steps = 300,
             Skip = 10, // Ignored in batch run
             OpenPositionQty = 100,
-            ComissionPercent = 0.00m,
+            ComissionPercent = 0.0005m,
             Intraday = null // Ignored in batchByDay run
         };
 
@@ -32,7 +32,7 @@ public class BackTestBatchRunnerTests : SystemTestBase
     {
         var bt = new BackTestRunner(MarketDataService, PortfolioService, Mediator, Logger);
         await bt.InitMarketData(_dataSources);
-        var res = await bt.RunBatch(_backTestParams, 10);
+        var res = await bt.RunBatch(_backTestParams, 100);
         var summaries = res.Select(r => r.GetSummary(_backTestParams.CurrencyCode));
 
         var avgTrading = summaries.Average(s => s.TradingAmount);
@@ -49,7 +49,7 @@ public class BackTestBatchRunnerTests : SystemTestBase
         var bt = new BackTestRunner(MarketDataService, PortfolioService, Mediator, Logger);
         await bt.InitMarketData(_dataSources);
 
-        var res = await bt.RunBatchByDay(_backTestParams, 20);
+        var res = await bt.RunBatchByDay(_backTestParams, 100);
 
         foreach (var kvp in res)
         {

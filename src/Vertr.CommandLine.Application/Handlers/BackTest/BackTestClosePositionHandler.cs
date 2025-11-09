@@ -42,7 +42,7 @@ namespace Vertr.CommandLine.Application.Handlers.BackTest
                 };
             }
 
-            var marketPrice = await _marketDataService.GetMarketPrice(request.Symbol, request.MarketTime, Models.PriceType.Avg);
+            var marketPrice = await _marketDataService.GetMarketPrice(request.Symbol, request.MarketTime, Models.PriceType.Open);
 
             if (marketPrice == null)
             {
