@@ -138,6 +138,7 @@ public class BackTestRunner
                 Skip = Random.Shared.Next(0, candleRange.Count - template.Steps),
                 OpenPositionQty = template.OpenPositionQty,
                 ComissionPercent = template.ComissionPercent,
+                
                 Intraday = intraday
             };
 
@@ -157,6 +158,7 @@ public class BackTestRunner
             CurrencyCode = backTestParams.CurrencyCode,
             OpenPositionQty = backTestParams.OpenPositionQty,
             ComissionPercent = backTestParams.ComissionPercent,
+            PriceThreshold = backTestParams.PriceThreshold,
         };
 
         var response = await _mediator.Send(request);

@@ -14,7 +14,10 @@ public class BackTestParams
 
     public decimal OpenPositionQty { get; init; } = 100;
 
-    public decimal ComissionPercent { get; init; } = 0.003m;
+    public decimal ComissionPercent { get; init; } = 0.0005m;
+
+    public decimal PriceThreshold { get; init; } = 0.0010m;
+
 
     public DateOnly? Intraday {  get; init; }
 }

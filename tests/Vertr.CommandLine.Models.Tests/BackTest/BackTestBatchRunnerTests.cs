@@ -10,7 +10,7 @@ public class BackTestBatchRunnerTests : SystemTestBase
         new FileDataSource
         {
             Symbol = "SBER",
-            FilePath = "Data\\SBER_251101_251109.csv",
+            FilePath = "Data\\SBER_251001_251109.csv",
         }
     };
 
@@ -24,6 +24,7 @@ public class BackTestBatchRunnerTests : SystemTestBase
             Skip = 10, // Ignored in batch run
             OpenPositionQty = 100,
             ComissionPercent = 0.0005m,
+            PriceThreshold = 0.0001m,
             Intraday = null // Ignored in batchByDay run
         };
 
@@ -51,6 +52,10 @@ public class BackTestBatchRunnerTests : SystemTestBase
 
         var res = await bt.RunBatchByDay(_backTestParams, 100);
 
+        var sumTrading = 0m;
+        var sumComissions = 0m;
+        var sumTotal = 0m;
+
         foreach (var kvp in res)
         {
             var summaries = kvp.Value.Select(r => r.GetSummary(_backTestParams.CurrencyCode));
@@ -58,8 +63,15 @@ public class BackTestBatchRunnerTests : SystemTestBase
             var avgComissions = summaries.Average(s => s.Comissions);
             var avgTotal = summaries.Average(s => s.TotalAmount);
 
+            sumTrading += avgTrading;
+            sumComissions += avgComissions;
+            sumTotal += avgTotal;
+
             Console.WriteLine($"Day={kvp.Key} AVG: Trading={avgTrading:c} Comissions={avgComissions:c} Total={avgTotal:c}");
         }
+
+        Console.WriteLine("\n----------------------------------------------");
+        Console.WriteLine($"SUM: Trading={sumTrading:c} Comissions={sumComissions:c} Total={sumTotal:c}");
 
         Assert.Pass();
     }
