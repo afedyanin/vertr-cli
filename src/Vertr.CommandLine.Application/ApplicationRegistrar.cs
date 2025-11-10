@@ -14,9 +14,15 @@ namespace Vertr.CommandLine.Application
             serviceCollection.AddSingleton<IMarketDataService, MarketDataService>();
             serviceCollection.AddSingleton<IPortfolioService, PortfolioService>();
             serviceCollection.AddSingleton<IOrderExecutionService, SimulatedOrderExecutionService>();
-            serviceCollection.AddSingleton<IPredictionService, SimulatedPredictionService>();
 
             return serviceCollection;
+        }
+
+        public static IServiceCollection AddSimulatedPredictionService(this IServiceCollection services, string predictorBaseUrl)
+        {
+            services.AddTransient<IPredictionService, SimulatedPredictionService>();
+
+            return services;
         }
     }
 }

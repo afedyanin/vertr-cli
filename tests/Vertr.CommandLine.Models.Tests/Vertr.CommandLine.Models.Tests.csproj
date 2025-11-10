@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Vertr.CommandLine.Application\Vertr.CommandLine.Application.csproj" />
+    <ProjectReference Include="..\..\src\Vertr.CommandLine.Predictor.Client\Vertr.CommandLine.Predictor.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

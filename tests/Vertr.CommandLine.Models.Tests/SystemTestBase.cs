@@ -3,11 +3,14 @@ using Microsoft.Extensions.Logging;
 using Vertr.CommandLine.Application;
 using Vertr.CommandLine.Common.Mediator;
 using Vertr.CommandLine.Models.Abstracttions;
+using Vertr.CommandLine.Predictor.Client;
 
 namespace Vertr.CommandLine.Models.Tests;
 
 public abstract class SystemTestBase
 {
+    private const string _baseAddress = "http://127.0.0.1:8081";
+
     private readonly IServiceProvider _serviceProvider;
     private readonly ILoggerFactory _loggerFactory;
 
@@ -25,6 +28,7 @@ public abstract class SystemTestBase
 
         services.AddMediator();
         services.AddApplication();
+        services.AddPredictionService(_baseAddress);
 
         _loggerFactory = LoggerFactory.Create(builder =>
         {

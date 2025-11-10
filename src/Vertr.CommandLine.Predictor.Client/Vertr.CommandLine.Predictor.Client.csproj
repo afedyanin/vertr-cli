@@ -12,6 +12,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<InternalsVisibleTo Include="Vertr.CommandLine.Predictor.Client.Tests" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <ProjectReference Include="..\Vertr.CommandLine.Models\Vertr.CommandLine.Models.csproj" />
 	</ItemGroup>
 

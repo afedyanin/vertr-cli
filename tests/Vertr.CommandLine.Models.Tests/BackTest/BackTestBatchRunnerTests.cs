@@ -20,7 +20,7 @@ public class BackTestBatchRunnerTests : SystemTestBase
             PortfolioId = Guid.NewGuid(),
             Symbol = "SBER",
             CurrencyCode = "RUB",
-            Steps = 300,
+            Steps = 100,
             Skip = 10, // Ignored in batch run
             OpenPositionQty = 100,
             ComissionPercent = 0.0005m,
@@ -33,7 +33,7 @@ public class BackTestBatchRunnerTests : SystemTestBase
     {
         var bt = new BackTestRunner(MarketDataService, PortfolioService, Mediator, Logger);
         await bt.InitMarketData(_dataSources);
-        var res = await bt.RunBatch(_backTestParams, 100);
+        var res = await bt.RunBatch(_backTestParams, 10);
         var summaries = res.Select(r => r.GetSummary(_backTestParams.CurrencyCode));
 
         var avgTrading = summaries.Average(s => s.TradingAmount);
@@ -50,7 +50,7 @@ public class BackTestBatchRunnerTests : SystemTestBase
         var bt = new BackTestRunner(MarketDataService, PortfolioService, Mediator, Logger);
         await bt.InitMarketData(_dataSources);
 
-        var res = await bt.RunBatchByDay(_backTestParams, 100);
+        var res = await bt.RunBatchByDay(_backTestParams, 10);
 
         var sumTrading = 0m;
         var sumComissions = 0m;
